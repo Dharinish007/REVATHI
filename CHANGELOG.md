@@ -6,6 +6,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 ## [Unreleased]
 
 ### Added
+- 2026-10-08 · **Phase 3 done.** Live test: a real `reset --hard` (user-approved) was reversed by `revathi undo`; reading the decoy asked for confirmation. The fake-key leak test was blocked, but not by REVATHI (no record); the hook denies that command when replayed.
+- 2026-10-08 · Undo follows `cd <dir> &&` and `git -C <dir>` to snapshot the folder a command really targets (found before the live test; test added).
+- 2026-10-08 · **Phase 3 (Safety net):** `engine/undo.py` (snapshots before file writes and risky commands; `revathi undo` restores, and its own changes can be undone), `engine/canary.py` (opt-in decoy credentials; read → ask, leak → deny), `cli/revathi.py` (`undo`, `canary`). Why: make mistakes cheap and make hidden-instruction attacks visible.
+- 2026-10-08 · Hook: PreToolUse now also covers Read, Grep, WebFetch, WebSearch and MCP tools (for the canary); ask messages say whether a snapshot was saved.
+- 2026-10-08 · Tests `tests/test_safety_net.py` (13). 36/36 pass.
 - 2026-10-08 · **Phase 2 done (v0.1 scope complete).** Live test in Claude Code: proof check sent the agent back once after an untested edit; the agent then disclosed the gap plainly. Log recorded every action; hash chain intact.
 - 2026-10-08 · **Phase 2 (Trust):** recorder `engine/log.py` (hash-chained session log, secrets redacted) and proof check `engine/proof.py` (no finishing after a code change until a test/build/lint check passes; blocks once). Rules in `policy/default.toml` `[proof]`. Why: stop fake "done", keep a record of every action.
 - 2026-10-08 · Claude Code adapter now handles PreToolUse, PostToolUse, PostToolUseFailure and Stop; `adapters/claude-code/settings.example.json` template; local `.claude/settings.json` updated for the live test.
@@ -20,6 +25,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 - 2026-10-08 · Project docs created: `AGENTS.md` (agent rules + personality), `CLAUDE.md` (pointer), `README.md` (sample), `revathi_dev_guide.md` (problems, vision, architecture, plan), `revathi_decisions.md`, `CHANGELOG.md`. Why: one clear source of truth before any code is written (Phase 0).
 
 ### Fixed
+- 2026-10-08 · Pruning old git snapshots left their hidden refs behind forever. Now released on prune. Regression test added.
 - 2026-10-08 · Proof check re-blocked every later turn over a gap already recorded as `unproven` (found in the live test: a docs-only turn was blocked over an earlier `calc.py` edit). Now it only judges what happened after the last `unproven` record. 2 regression tests.
 
 ### Fixed (compared with the Agentic OS guard)

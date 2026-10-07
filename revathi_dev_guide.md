@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 3 (Safety net) next** · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
+**Current phase:** **Phase 4 (Front desk) next** · Phase 3 ✅ (2026-10-08) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
 
 ---
 
@@ -226,7 +226,7 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 | 0 📄 Docs ✅ | Shared understanding | These docs | – | Docs written and reviewed |
 | 1 🧱 Foundation ✅ | Clean base | Folder structure; `core/` rules + skills ported; `engine/event.py`; policy file; guard ported with 2 holes fixed; Claude Code adapter | 5, 3, 10 | Guard tests pass, including both holes and a dangerous-command test set; works live in Claude Code |
 | 2 🧾 Trust ✅ | No fake "done" | Proof Stop hook + receipt; recorder | 1, 6 | "Done without proof" is blocked in a live test; every action appears in the log |
-| 3 ↩️ Safety net | Survive mistakes | Undo snapshot/restore; canary traps | 5, 4 | Seeded destructive action restored by `revathi undo`; canary touch is flagged |
+| 3 ↩️ Safety net ✅ | Survive mistakes | Undo snapshot/restore; canary traps | 5, 4 | Seeded destructive action restored by `revathi undo`; canary touch is flagged |
 | 4 ⌨️ Front desk | One-command setup | CLI: install / doctor / mode / undo / log; Antigravity adapter; Windows + Mac/Linux | 13, 12 | Fresh machine → `revathi install` → `revathi doctor` all green in 2 tools |
 | 5 🧪 Proven | Evidence | All evals 3+ runs, baseline vs REVATHI; cost per correct result; CI | 2, 3, 9, 10 | Scorecard shows a verdict for every skill; neutral + costly skills cut |
 | 6 🚀 Launch | Public v1 | GitHub release, Claude Code plugin, PyPI; real README; license | – | A new user installs from a public channel and passes the quick start |
@@ -267,6 +267,16 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [x] Live test in a real Claude Code session (2026-10-08): the agent was told not to test; the proof check sent it back once with the REVATHI reason, and it then told the user plainly the fix was unverified. Log: 7 records, hash chain intact. **Bug found:** the already-disclosed `calc.py` gap blocked the next, docs-only turn too. Fixed (only judge records after the last `unproven`), 2 regression tests added, and a replay of the real log no longer blocks.
 
 **Phase 2 limits (honest):** edits made through shell commands aren't seen as code edits · checks are recognized by command patterns · "passed" = exit 0 and no failure text; it can't judge test quality · each tool call now runs the hook twice (before + after), about 100 ms each.
+
+### Phase 3 checklist
+- [x] `engine/undo.py`: snapshots before file writes (copies) and before risky commands (git: hidden commit under `refs/revathi/`, user's branch/staging/stash untouched; outside git: copy of folders about to be deleted, ≤50 MB); keeps newest 200; undo of an undo
+- [x] `engine/canary.py`: opt-in decoy `credentials.backup` with a unique fake key; touching the decoy → ask; the key in any action → deny
+- [x] `cli/revathi.py`: `undo [--list] [id]`, `canary plant <dir> | status` (rest of the CLI in Phase 4)
+- [x] Hook: canary → guard → snapshot; ask messages say "a snapshot was saved" or "cannot be undone"
+- [x] Tests: `tests/test_safety_net.py` (13: real `reset --hard` + `clean -fd`, moved branch, `rm -rf` outside git, overwrite, new file, undo of undo, unsaveable command, canary read/leak/normal/log, pruning); 36/36 pass
+- [x] Live test in a real Claude Code session (2026-10-08, throwaway repo outside the project): `git -C <repo> reset --hard` asked with "a snapshot was saved", the user approved, work was lost, and `revathi undo` brought back "important unsaved work" ✅ · reading the decoy asked ✅ (recorded) · the fake-key `curl` was reported blocked, but **no REVATHI record exists** for it, so the block came from somewhere else (likely the agent declining, or Claude Code itself). Replaying that exact command through the hook → REVATHI denies it. Log chain intact; fake key never written to the log.
+
+**Phase 3 notes:** found while timing: pruned git snapshots left hidden refs behind → fixed with a regression test (my timing run had also created 7 refs in the real Agentic OS repo; removed) · undo is local only (no pushes, publishes, messages, databases) · canary catches only attacks that touch the decoy.
 
 ### Backlog (later, not now)
 Cross-model second opinion · hidden tests / mutation testing · thinker/doer split · MCP gateway · skill registry with evidence scores · "REVATHI-verified" badge · formal verification (research only).

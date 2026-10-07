@@ -22,6 +22,8 @@ Agents may add *Proposed* entries. Only the user accepts them.
 | D14 | Recorder logs go to `~/.revathi/logs/<session>.jsonl` (override: `REVATHI_HOME`); commands only, trimmed and redacted; no output | Proposed | Keeps users' repos clean; private and local (D11); output could hold secrets or personal data | 2026-10-08 |
 | D15 | Proof check **blocks once**: if the agent stops again, it may finish, and the log records `unproven` | Proposed | Some projects have no tests; blocking forever would trap the agent. One push back plus an honest record is enough | 2026-10-08 |
 | D16 | Proof only applies to **code** files (list in policy); docs and config edits don't need a check | Proposed | Avoids nagging on README or settings edits; list is easy to extend | 2026-10-08 |
+| D17 | Undo snapshots: file copies before every write; before risky commands a hidden git commit (`refs/revathi/snapshots/*`) in git repos, else a copy of folders being deleted (≤50 MB); newest 200 kept in `~/.revathi/snapshots` | Proposed | Cheap, never touches the user's branch, staging or stash; works without git for deletes | 2026-10-08 |
+| D18 | Canary is **opt-in** (`revathi canary plant <dir>`); decoy read → ask, fake key in any action → deny | Proposed | Planting files in users' projects without asking would be intrusive; near-zero false alarms | 2026-10-08 |
 
 ## Open questions (need the user)
 | ID | Question | Options |

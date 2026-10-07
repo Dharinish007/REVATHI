@@ -4,7 +4,7 @@
 
 | Hook event | Engine part | What happens |
 |---|---|---|
-| `PreToolUse` | 🛡️ guard | `deny` / `ask` / no opinion. Blocked and asked actions are recorded |
+| `PreToolUse` | 🪤 canary + 🛡️ guard + ↩️ undo | Canary first (all matched tools), then guard: `deny` / `ask` / no opinion. Snapshot before file writes and before risky (*asked*) commands; the ask message says whether undo is possible. Blocked and asked actions are recorded |
 | `PostToolUse` | 📼 recorder | What ran or changed. Test/build/lint commands are marked `check: pass` |
 | `PostToolUseFailure` | 📼 recorder | Same, marked failed (`check: fail` for checks) |
 | `Stop` | 🧾 proof | If code changed and no check passed afterwards → `block` once, with the reason. If the agent stops again, it may finish and the log records `unproven` |
@@ -19,6 +19,8 @@ Logs: `~/.revathi/logs/<session>.jsonl` (override with `REVATHI_HOME`). No comma
 Fail behavior: guard crash → `ask` (D10). Recorder or proof crash → the agent carries on (never trapped).
 
 ## Known limits
+- PreToolUse matches `Bash|PowerShell|Write|Edit|MultiEdit|Read|Grep|WebFetch|WebSearch|mcp__.*` so the canary sees reads, searches and web/MCP calls. Each matched call costs ~150 ms (Python start); a risky command in a git repo ~0.6 s (snapshot).
+- Undo covers local files only: it cannot undo pushes, published packages, sent messages or database changes.
 - Files changed through shell commands (`sed -i`, `echo >`) are not seen as code edits; only `Write`/`Edit`/`MultiEdit` are.
 - A check is recognized by its command (`policy/default.toml` → `[proof]`). Unusual test commands need adding there.
 - "Passed" = exit code 0 and no failure text in the output (catches `pytest | tail` hiding a failure). It cannot judge whether the tests are meaningful.

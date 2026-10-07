@@ -37,7 +37,7 @@ def _find_secret(text, pol):
     return False
 
 
-def _recursive_delete_targets(command):
+def recursive_delete_targets(command):
     """Yield the path arguments of rm -r / Remove-Item -Recurse calls."""
     for seg in re.split(r"[|;&]+", command):
         words = seg.split()
@@ -54,7 +54,7 @@ def _recursive_delete_targets(command):
 
 
 def check_command(command, pol):
-    for target in _recursive_delete_targets(command):
+    for target in recursive_delete_targets(command):
         if target.strip("\"'").lower().rstrip() in pol.root_targets:
             return Decision("deny", f"deleting '{target}' would wipe your whole drive, home or project folder")
     if _find_secret(command, pol):
