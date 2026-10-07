@@ -1,0 +1,126 @@
+# REVATHI default policy.
+# deny = blocked outright · ask = the user must confirm · anything else = the tool's normal permissions apply.
+# Patterns are Python regular expressions, matched case-insensitively against the whole command.
+# Git commands are matched after global options are removed, so "git -C repo reset --hard" matches "git reset --hard".
+# Reasons are shown to the user: keep them plain English.
+
+[guard]
+# Recursive delete of any of these is denied. Compared lower-case, quotes stripped.
+root_targets = ["/", "/*", "~", "~/", "~/*", "$home", "${home}", "$home/", "*", ".", "./", "..",
+                "c:", "c:/", "c:\\", "c:/*", "c:\\*", "$env:userprofile", "%userprofile%"]
+
+[[guard.deny]]
+pattern = '\bmkfs(\.\w+)?\b'
+reason = "this would format a disk and erase everything on it"
+
+[[guard.deny]]
+pattern = '\bdd\b[^|;&]*\bof=/dev/'
+reason = "this would write raw data over a disk device"
+
+[[guard.deny]]
+pattern = '\bformat(\.com)?\s+[a-z]:'
+reason = "this would format a drive"
+
+[[guard.deny]]
+pattern = ':\(\)\s*\{\s*:\|:&\s*\};:'
+reason = "this is a fork bomb that freezes the computer"
+
+[[guard.deny]]
+pattern = '\bgit\s+push\b(?=[^|;&]*(\s--force\b|\s-f\b|\s\+))(?=[^|;&]*\b(main|master)\b)'
+reason = "force-pushing to main/master can erase other people's work"
+
+[[guard.ask]]
+pattern = '\bgit\s+push\b[^|;&]*(\s--force(-with-lease)?\b|\s-f\b|\s\+\S)'
+reason = "force-push rewrites history on the remote"
+
+[[guard.ask]]
+pattern = '\bgit\s+push\b[^|;&]*(\s--delete\b|\s:\S)'
+reason = "this deletes a remote branch"
+
+[[guard.ask]]
+pattern = '\bgit\s+reset\b[^|;&]*--hard'
+reason = "this throws away uncommitted work"
+
+[[guard.ask]]
+pattern = '\bgit\s+clean\b[^|;&]*\s-[a-z]*f'
+reason = "this deletes untracked files"
+
+[[guard.ask]]
+pattern = '\bgit\s+checkout\b[^|;&]*\s--\s'
+reason = "this throws away unsaved changes in files"
+
+[[guard.ask]]
+pattern = '\bgit\s+restore\b(?![^|;&]*--staged)'
+reason = "this throws away unsaved changes in files"
+
+[[guard.ask]]
+pattern = '\bgit\s+branch\b[^|;&]*\s-D\b'
+reason = "this force-deletes a branch"
+
+[[guard.ask]]
+pattern = '\bgit\s+stash\s+(drop|clear)\b'
+reason = "this deletes saved (stashed) work"
+
+[[guard.ask]]
+pattern = '\bgit\s+(filter-branch|filter-repo)\b'
+reason = "this rewrites history"
+
+[[guard.ask]]
+pattern = '\bgit\s+rebase\b'
+reason = "this rewrites history"
+
+[[guard.ask]]
+pattern = '\brm\s+(-\w+\s+)*-\w*[rR]'
+reason = "this deletes a folder and everything in it"
+
+[[guard.ask]]
+pattern = '\bRemove-Item\b[^|;&]*-Recurse'
+reason = "this deletes a folder and everything in it"
+
+[[guard.ask]]
+pattern = '\b(rmdir|rd)\s+/s\b'
+reason = "this deletes a folder and everything in it"
+
+[[guard.ask]]
+pattern = '\bdel\s+[^|;&]*/s\b'
+reason = "this deletes files in all subfolders"
+
+[[guard.ask]]
+pattern = '\bfind\b[^|;&]*\s-delete\b'
+reason = "this deletes every file it finds"
+
+[[guard.ask]]
+pattern = '\b(drop\s+(table|database|schema)|truncate\s+table)\b'
+reason = "this destroys database data"
+
+[[guard.ask]]
+pattern = '\b(npm|pnpm|yarn)\s+publish\b|\btwine\s+upload\b|\bcargo\s+publish\b'
+reason = "this publishes a package publicly"
+
+[[guard.ask]]
+pattern = '\bgh\s+(release\s+create|pr\s+merge|repo\s+delete)\b'
+reason = "this is a public action on GitHub"
+
+[[guard.ask]]
+pattern = '\b(terraform\s+destroy|kubectl\s+delete|docker\s+system\s+prune)\b'
+reason = "this destroys infrastructure"
+
+[[guard.ask]]
+pattern = '\b(curl|wget|iwr|invoke-webrequest)\b[^;&]*\|\s*(sh|bash|zsh|iex|invoke-expression)\b'
+reason = "this downloads a script and runs it without checking it"
+
+[guard.secrets]
+# Matched case-sensitively. A match containing a placeholder word is ignored.
+patterns = [
+  'AKIA[0-9A-Z]{16}',
+  '\bsk-(ant-)?[A-Za-z0-9_\-]{20,}',
+  '\bgh[pousr]_[A-Za-z0-9]{36}\b',
+  '\bgithub_pat_[A-Za-z0-9_]{40,}',
+  '\bxox[abprs]-[A-Za-z0-9\-]{10,}',
+  '\bAIza[0-9A-Za-z_\-]{35}\b',
+  '-----BEGIN (RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----',
+  '''(?i)\b[\w-]*(api[_-]?key|secret|token|passw(or)?d)\b\s*[:=]\s*["']([^"'\s]{16,})["']''',
+]
+placeholder = '(?i)your|xxx|example|changeme|placeholder|dummy|<|\$\{|\{\{|os\.environ|process\.env'
+# .env files are the right place for secrets (keep them git-ignored), except these templates.
+env_template_suffixes = [".example", ".sample", ".template"]
