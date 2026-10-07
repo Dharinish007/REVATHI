@@ -125,8 +125,17 @@ class ProofTests(unittest.TestCase):
         self.s.stop()
         self.s.stop(active=True)
         self.s.edit("other.py")
-        self.assertBlocked(self.s.stop(), "other.py")
-        self.assertNotIn("calc.py", self.s.stop()["reason"])
+        out = self.s.stop()
+        self.assertBlocked(out, "other.py")
+        self.assertNotIn("calc.py", out["reason"])
+
+    def test_blocks_once_even_without_the_tools_flag(self):
+        # Antigravity has no stop_hook_active: the log alone must stop a second block for the same change
+        self.s.edit("app.py")
+        self.assertIsNotNone(self.s.stop())
+        self.assertIsNone(self.s.stop())
+        self.s.edit("app.py")
+        self.assertIsNotNone(self.s.stop(), "a new change gets checked again")
 
     def test_sessions_are_separate(self):
         self.s.edit("app.py")

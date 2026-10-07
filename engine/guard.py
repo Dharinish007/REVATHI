@@ -63,12 +63,12 @@ def check_command(command, pol):
             return Decision("deny", "this command contains a secret key, which would end up in files, history or logs. "
                                     "Put it in an environment variable or a git-ignored .env file instead")
     normalized = normalize_git(command)
-    for pattern, reason in pol.deny:
+    for pattern, reason, _ in pol.deny:
         if pattern.search(normalized):
             return Decision("deny", reason)
-    for pattern, reason in pol.ask:
+    for pattern, reason, undoable in pol.ask:
         if pattern.search(normalized):
-            return Decision("ask", f"{reason}. Please confirm this is intended")
+            return Decision("ask", f"{reason}. Please confirm this is intended", undoable)
     return None
 
 

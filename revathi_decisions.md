@@ -24,6 +24,12 @@ Agents may add *Proposed* entries. Only the user accepts them.
 | D16 | Proof only applies to **code** files (list in policy); docs and config edits don't need a check | Proposed | Avoids nagging on README or settings edits; list is easy to extend | 2026-10-08 |
 | D17 | Undo snapshots: file copies before every write; before risky commands a hidden git commit (`refs/revathi/snapshots/*`) in git repos, else a copy of folders being deleted (≤50 MB); newest 200 kept in `~/.revathi/snapshots` | Proposed | Cheap, never touches the user's branch, staging or stash; works without git for deletes | 2026-10-08 |
 | D18 | Canary is **opt-in** (`revathi canary plant <dir>`); decoy read → ask, fake key in any action → deny | Proposed | Planting files in users' projects without asking would be intrusive; near-zero false alarms | 2026-10-08 |
+| D19 | `revathi install` **replaces** Agent OS: disables its Claude Code plugin and Antigravity guard group (re-enabled by uninstall) | Accepted | One guard, no double prompts; reversible | 2026-10-08 |
+| D20 | Install = **hooks + skills + subagents only**; `~/.claude/CLAUDE.md` and other rules files are never touched | Accepted | The user's personal rules already cover REVATHI's; enforcement comes from hooks | 2026-10-08 |
+| D21 | `revathi mode` controls **REVATHI strictness only**: careful = extra asks (push, delete, amend, package installs); balanced = default; full = local undoable risky actions run without asking once a snapshot is saved, irreversible ones still ask, catastrophic still denied | Accepted (direction) · details Proposed | Tool permission settings stay the user's | 2026-10-08 |
+| D22 | Install copies the runtime to `~/.revathi/app`; hooks call `python "<app>/adapters/<tool>/hook.py"` (`python3` on Mac/Linux) | Proposed | Works after the repo moves; same command form works in cmd, PowerShell and bash | 2026-10-08 |
+| D23 | "Block once per code change" is tracked in the session log by the engine, not by a tool flag | Proposed | Antigravity has no `stop_hook_active`; one rule for every tool | 2026-10-08 |
+| D24 | In Antigravity, REVATHI's *ask* is sent as **`force_ask`** | Accepted | Antigravity's `ask` respects "Always Allow" and passed silently with the user's allow-all setting (live 2026-10-08); REVATHI's asks must not depend on tool auto-approve. Fewer prompts = `revathi mode full` | 2026-10-08 |
 
 ## Open questions (need the user)
 | ID | Question | Options |

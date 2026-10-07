@@ -157,14 +157,14 @@ def snapshot_for_command(cwd, delete_targets, session="", reason="", command="")
     if not cwd:
         return None  # without the agent's folder we can't know what the command would touch
     cwd = target_dir(command, cwd)
-    top = git_root(cwd)
-    if top:
-        return snapshot_git(top, session, reason)
     targets = [os.path.join(cwd, t.strip("\"'")) for t in delete_targets]
-    if targets:
+    if targets:  # copying the exact targets also covers git-ignored files (.env, build output)
         manifest = snapshot_copy(targets, session, reason)
-        return manifest if any("stored" in e for e in manifest["entries"]) else None
-    return None
+        if all("stored" in e for e in manifest["entries"]):
+            return manifest
+        shutil.rmtree(store() / manifest["id"], ignore_errors=True)
+    top = git_root(cwd)
+    return snapshot_git(top, session, reason) if top else None
 
 
 # ---------- list / restore ----------

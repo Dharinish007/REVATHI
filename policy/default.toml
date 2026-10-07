@@ -3,6 +3,7 @@
 # Patterns are Python regular expressions, matched case-insensitively against the whole command.
 # Git commands are matched after global options are removed, so "git -C repo reset --hard" matches "git reset --hard".
 # Reasons are shown to the user: keep them plain English.
+# undoable = true marks rules that only change local files: in full mode they run without asking once a snapshot is saved.
 
 [guard]
 # Recursive delete of any of these is denied. Compared lower-case, quotes stripped.
@@ -40,18 +41,22 @@ reason = "this deletes a remote branch"
 [[guard.ask]]
 pattern = '\bgit\s+reset\b[^|;&]*--hard'
 reason = "this throws away uncommitted work"
+undoable = true
 
 [[guard.ask]]
 pattern = '\bgit\s+clean\b[^|;&]*\s-[a-z]*f'
 reason = "this deletes untracked files"
+undoable = true
 
 [[guard.ask]]
 pattern = '\bgit\s+checkout\b[^|;&]*\s--\s'
 reason = "this throws away unsaved changes in files"
+undoable = true
 
 [[guard.ask]]
 pattern = '\bgit\s+restore\b(?![^|;&]*--staged)'
 reason = "this throws away unsaved changes in files"
+undoable = true
 
 [[guard.ask]]
 pattern = '\bgit\s+branch\b[^|;&]*\s-D\b'
@@ -72,22 +77,27 @@ reason = "this rewrites history"
 [[guard.ask]]
 pattern = '\brm\s+(-\w+\s+)*-\w*[rR]'
 reason = "this deletes a folder and everything in it"
+undoable = true
 
 [[guard.ask]]
 pattern = '\bRemove-Item\b[^|;&]*-Recurse'
 reason = "this deletes a folder and everything in it"
+undoable = true
 
 [[guard.ask]]
 pattern = '\b(rmdir|rd)\s+/s\b'
 reason = "this deletes a folder and everything in it"
+undoable = true
 
 [[guard.ask]]
 pattern = '\bdel\s+[^|;&]*/s\b'
 reason = "this deletes files in all subfolders"
+undoable = true
 
 [[guard.ask]]
 pattern = '\bfind\b[^|;&]*\s-delete\b'
 reason = "this deletes every file it finds"
+undoable = true
 
 [[guard.ask]]
 pattern = '\b(drop\s+(table|database|schema)|truncate\s+table)\b'
@@ -159,3 +169,13 @@ failure_output = [
 code_extensions = [".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".go", ".rs", ".java", ".kt", ".kts",
                    ".c", ".h", ".cc", ".cpp", ".hpp", ".cs", ".rb", ".php", ".swift", ".scala", ".dart",
                    ".vue", ".svelte", ".sh", ".ps1", ".sql", ".lua", ".ex", ".exs"]
+
+# Modes (set with `revathi mode`): balanced = this policy as is (default).
+# careful = also ask before these; full = undoable "ask" rules run without asking once a snapshot is saved.
+[modes.careful]
+extra_ask = [
+  { pattern = '\bgit\s+push\b', reason = "careful mode: this sends commits to the remote" },
+  { pattern = '\bgit\s+commit\b[^|;&]*--amend', reason = "careful mode: this rewrites the last commit" },
+  { pattern = '(^|[;&|]\s*)(rm|del|erase|Remove-Item|ri)\s', reason = "careful mode: this deletes files" },
+  { pattern = '\b(npm|pnpm|yarn|bun)\s+(i|install|add)\b|\bpip3?\s+install\b|\bcargo\s+add\b', reason = "careful mode: this installs packages from the internet" },
+]

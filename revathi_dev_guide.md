@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 4 (Front desk) next** · Phase 3 ✅ (2026-10-08) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
+**Current phase:** **Phase 4 (Front desk) 🔨 in progress** · Phase 3 ✅ (2026-10-08) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
 
 ---
 
@@ -227,7 +227,7 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 | 1 🧱 Foundation ✅ | Clean base | Folder structure; `core/` rules + skills ported; `engine/event.py`; policy file; guard ported with 2 holes fixed; Claude Code adapter | 5, 3, 10 | Guard tests pass, including both holes and a dangerous-command test set; works live in Claude Code |
 | 2 🧾 Trust ✅ | No fake "done" | Proof Stop hook + receipt; recorder | 1, 6 | "Done without proof" is blocked in a live test; every action appears in the log |
 | 3 ↩️ Safety net ✅ | Survive mistakes | Undo snapshot/restore; canary traps | 5, 4 | Seeded destructive action restored by `revathi undo`; canary touch is flagged |
-| 4 ⌨️ Front desk | One-command setup | CLI: install / doctor / mode / undo / log; Antigravity adapter; Windows + Mac/Linux | 13, 12 | Fresh machine → `revathi install` → `revathi doctor` all green in 2 tools |
+| 4 ⌨️ Front desk 🔨 | One-command setup | CLI: install / doctor / mode / undo / log; Antigravity adapter; Windows + Mac/Linux | 13, 12 | Fresh machine → `revathi install` → `revathi doctor` all green in 2 tools |
 | 5 🧪 Proven | Evidence | All evals 3+ runs, baseline vs REVATHI; cost per correct result; CI | 2, 3, 9, 10 | Scorecard shows a verdict for every skill; neutral + costly skills cut |
 | 6 🚀 Launch | Public v1 | GitHub release, Claude Code plugin, PyPI; real README; license | – | A new user installs from a public channel and passes the quick start |
 | 7 🧠 Memory | Second brain | Memory store, index, search, approval, expiry | 7, 8 | Facts survive across sessions and 2 tools; a planted bad memory is rejected |
@@ -277,6 +277,19 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [x] Live test in a real Claude Code session (2026-10-08, throwaway repo outside the project): `git -C <repo> reset --hard` asked with "a snapshot was saved", the user approved, work was lost, and `revathi undo` brought back "important unsaved work" ✅ · reading the decoy asked ✅ (recorded) · the fake-key `curl` was reported blocked, but **no REVATHI record exists** for it, so the block came from somewhere else (likely the agent declining, or Claude Code itself). Replaying that exact command through the hook → REVATHI denies it. Log chain intact; fake key never written to the log.
 
 **Phase 3 notes:** found while timing: pruned git snapshots left hidden refs behind → fixed with a regression test (my timing run had also created 7 refs in the real Agentic OS repo; removed) · undo is local only (no pushes, publishes, messages, databases) · canary catches only attacks that touch the decoy.
+
+### Phase 4 checklist
+- [x] `engine/pipeline.py`: one tool-neutral flow (before / after / finish) so adapters only translate; "block once" now tracked in the log, not a tool flag
+- [x] Antigravity adapter (`adapters/antigravity/hook.py`): PreToolUse, PostToolUse, Stop (`decision: continue`), from the Antigravity hooks docs
+- [x] `cli/install.py` + `revathi install [--dry-run] | uninstall | doctor`: runtime copied to `~/.revathi/app`; Claude Code hooks merged into `settings.json`, skills + subagents placed (conflicts left alone), Agent OS plugin disabled; Antigravity `revathi` hooks group + skills; backups; uninstall reverses exactly what install recorded
+- [x] `revathi mode careful|balanced|full` (REVATHI strictness only) and `revathi log`
+- [x] Tests: `test_antigravity.py` (6), `test_install.py` (12, fake home), all suites 56/56; mutation check: 2 planted installer bugs caught
+- [x] Cross-platform: Python only (no `.ps1`); `python` on Windows, `python3` elsewhere. ❓ Mac/Linux not run yet
+- [x] Real install on this machine + `revathi doctor` all green in Claude Code and Antigravity (2026-10-08)
+- [x] Live test in Claude Code after install: risky command asked with "snapshot saved" and was recorded
+- [ ] Live test in Antigravity. **Antigravity IDE** loads REVATHI's hooks (its log), the quoting fix is untested live there. **Antigravity 2.0** (v2.15.0) shows no hooks loading at all, though its bundled docs say `~/.gemini/config/hooks.json` is read; REVATHI skills do reach it. Cause unknown ❓
+
+**Phase 4 notes:** live: Antigravity hooks loaded but failed (quoted path under `cmd /c`) → fixed; `ask` → `force_ask` (D24) · the real-machine dry run found a crash the tests missed (`claude plugin list` prints `❯`, Windows decoded it wrongly) → fixed + test · the "disabled" wording of `claude plugin list` is assumed, not seen yet.
 
 ### Backlog (later, not now)
 Cross-model second opinion · hidden tests / mutation testing · thinker/doer split · MCP gateway · skill registry with evidence scores · "REVATHI-verified" badge · formal verification (research only).

@@ -6,6 +6,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 ## [Unreleased]
 
 ### Added
+- 2026-10-08 · REVATHI installed on the dev machine; doctor green in both tools. Live: Claude Code ✅; Antigravity IDE loads the hooks (fix not yet re-tested live); Antigravity 2.0 does not load global hooks (cause unknown).
+- 2026-10-08 · **Phase 4 (Front desk):** `revathi install [--dry-run] | uninstall | doctor | mode | log` (`cli/install.py`, `cli/revathi.py`); Antigravity adapter; `engine/pipeline.py` (shared flow), `engine/config.py` (mode). Why: one-command setup in 2 tools, reversible.
+- 2026-10-08 · Modes: careful (extra asks), balanced (default), full (undoable local actions run after a snapshot). Policy rules marked `undoable`.
+- 2026-10-08 · Tests: `test_antigravity.py`, `test_install.py` (fake home). 56/56 pass.
 - 2026-10-08 · **Phase 3 done.** Live test: a real `reset --hard` (user-approved) was reversed by `revathi undo`; reading the decoy asked for confirmation. The fake-key leak test was blocked, but not by REVATHI (no record); the hook denies that command when replayed.
 - 2026-10-08 · Undo follows `cd <dir> &&` and `git -C <dir>` to snapshot the folder a command really targets (found before the live test; test added).
 - 2026-10-08 · **Phase 3 (Safety net):** `engine/undo.py` (snapshots before file writes and risky commands; `revathi undo` restores, and its own changes can be undone), `engine/canary.py` (opt-in decoy credentials; read → ask, leak → deny), `cli/revathi.py` (`undo`, `canary`). Why: make mistakes cheap and make hidden-instruction attacks visible.
@@ -25,6 +29,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 - 2026-10-08 · Project docs created: `AGENTS.md` (agent rules + personality), `CLAUDE.md` (pointer), `README.md` (sample), `revathi_dev_guide.md` (problems, vision, architecture, plan), `revathi_decisions.md`, `CHANGELOG.md`. Why: one clear source of truth before any code is written (Phase 0).
 
 ### Fixed
+- 2026-10-08 · **Antigravity hooks never ran** (live test): Antigravity runs hooks via `cmd /c`, which passed the quoted script path to Python with literal quotes, so every REVATHI hook failed and Antigravity let actions through. Found in Antigravity's own log. Fix: unquoted path (Windows short path if it has spaces); `doctor` now probes the hook through `cmd /c` like Antigravity. Test added (fake home with a space).
+- 2026-10-08 · Antigravity: REVATHI's *ask* is now `force_ask`, because `ask` was silently auto-approved under "Always Allow" (D24).
+- 2026-10-08 · Installer crashed on Windows reading `claude plugin list` (the `❯` character); found by a real-machine dry run. Test added.
+- 2026-10-08 · Deletes now snapshot the exact targets first (covers git-ignored files like `.env`), falling back to a git snapshot.
 - 2026-10-08 · Pruning old git snapshots left their hidden refs behind forever. Now released on prune. Regression test added.
 - 2026-10-08 · Proof check re-blocked every later turn over a gap already recorded as `unproven` (found in the live test: a docs-only turn was blocked over an earlier `calc.py` edit). Now it only judges what happened after the last `unproven` record. 2 regression tests.
 

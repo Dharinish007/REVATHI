@@ -11,7 +11,7 @@ DEFAULT = Path(__file__).resolve().parent.parent / "policy" / "default.toml"
 @dataclass
 class GuardPolicy:
     root_targets: set
-    deny: list              # [(compiled pattern, reason)]
+    deny: list              # [(compiled pattern, reason, undoable)]
     ask: list
     secrets: list           # [compiled pattern]
     placeholder: re.Pattern
@@ -30,6 +30,7 @@ class ProofPolicy:
 class Policy:
     guard: GuardPolicy
     proof: ProofPolicy
+    careful_ask: list       # [(compiled pattern, reason)] extra asks in careful mode
 
 
 @lru_cache(maxsize=None)
@@ -37,7 +38,8 @@ def load(path=DEFAULT):
     with open(path, "rb") as f:
         data = tomllib.load(f)
     guard, proof = data["guard"], data["proof"]
-    rules = lambda key: [(re.compile(r["pattern"], re.I), r["reason"]) for r in guard.get(key, [])]
+    rules = lambda key: [(re.compile(r["pattern"], re.I), r["reason"], r.get("undoable", False))
+                         for r in guard.get(key, [])]
     compile_all = lambda patterns, flags=0: [re.compile(p, flags) for p in patterns]
     secrets = guard["secrets"]
     return Policy(
@@ -55,4 +57,6 @@ def load(path=DEFAULT):
             failure_output=compile_all(proof["failure_output"], re.M),
             code_extensions=tuple(e.lower() for e in proof["code_extensions"]),
         ),
+        careful_ask=[(re.compile(r["pattern"], re.I), r["reason"])
+                     for r in data.get("modes", {}).get("careful", {}).get("extra_ask", [])],
     )
