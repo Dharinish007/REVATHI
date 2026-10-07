@@ -124,3 +124,38 @@ patterns = [
 placeholder = '(?i)your|xxx|example|changeme|placeholder|dummy|<|\$\{|\{\{|os\.environ|process\.env'
 # .env files are the right place for secrets (keep them git-ignored), except these templates.
 env_template_suffixes = [".example", ".sample", ".template"]
+
+[proof]
+# Before the agent may finish a turn in which it changed code, a check must have passed after the last change.
+# A command counts as a check if it matches one of these (case-insensitive).
+verify_commands = [
+  '\b(py\.?test|tox|nox)\b',
+  '\bpython[0-9.]*\s+-m\s+(pytest|unittest|mypy|ruff|pyright|compileall)\b',
+  '\b(ruff|mypy|pyright|flake8|pylint)\b',
+  '\b(npm|pnpm|yarn|bun)\s+(run\s+)?(test|build|lint|check|typecheck|type-check)\b',
+  '\b(npx\s+)?(jest|vitest|tsc|eslint|playwright\s+test|mocha)\b',
+  '\bdeno\s+(test|check|lint)\b',
+  '\bgo\s+(test|build|vet)\b',
+  '\bcargo\s+(test|build|check|clippy)\b',
+  '\b(mvn|mvnw)\b[^|;&]*\b(test|verify|package)\b',
+  '\bgradlew?\b[^|;&]*\b(test|build|check)\b',
+  '\bdotnet\s+(test|build)\b',
+  '\bmake\s+(test|check|build)\b',
+  '\b(ctest|phpunit|rspec)\b',
+  '\bswift\s+(test|build)\b',
+]
+# Commands that force success hide real failures, so they never count as a check.
+not_counted = [
+  '\|\|\s*(true|:|exit\s+0)\b',
+  ';\s*(true|exit\s+0)\s*$',
+]
+# Output that shows a check failed even when the exit code says success (e.g. "pytest | tail").
+failure_output = [
+  '\b[1-9][0-9]* (failed|failing|errors?)\b',
+  '^FAILED\b',
+  '^Traceback \(most recent call last\)',
+  '^FAIL\b',
+]
+code_extensions = [".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".go", ".rs", ".java", ".kt", ".kts",
+                   ".c", ".h", ".cc", ".cpp", ".hpp", ".cs", ".rb", ".php", ".swift", ".scala", ".dart",
+                   ".vue", ".svelte", ".sh", ".ps1", ".sql", ".lua", ".ex", ".exs"]

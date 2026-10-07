@@ -19,6 +19,9 @@ Agents may add *Proposed* entries. Only the user accepts them.
 | D11 | **Local and private by default**: no network, no telemetry | Proposed | Trust product; works offline; nothing leaves the machine | 2026-10-08 |
 | D12 | Memory is **approval-gated**: agents propose, the user approves | Proposed | Prevents memory poisoning; the user stays in control | 2026-10-08 |
 | D13 | Distribution: GitHub → Claude Code plugin → PyPI, then other tool stores | Proposed | Reaches developers first; exact store steps still to check | 2026-10-08 |
+| D14 | Recorder logs go to `~/.revathi/logs/<session>.jsonl` (override: `REVATHI_HOME`); commands only, trimmed and redacted; no output | Proposed | Keeps users' repos clean; private and local (D11); output could hold secrets or personal data | 2026-10-08 |
+| D15 | Proof check **blocks once**: if the agent stops again, it may finish, and the log records `unproven` | Proposed | Some projects have no tests; blocking forever would trap the agent. One push back plus an honest record is enough | 2026-10-08 |
+| D16 | Proof only applies to **code** files (list in policy); docs and config edits don't need a check | Proposed | Avoids nagging on README or settings edits; list is easy to extend | 2026-10-08 |
 
 ## Open questions (need the user)
 | ID | Question | Options |

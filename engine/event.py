@@ -16,5 +16,5 @@ class Event:
 
 @dataclass
 class Decision:
-    verdict: str    # "ask" or "deny"; no Decision at all means "no opinion"
-    reason: str     # plain English, shown to the user
+    verdict: str    # "ask" or "deny" before an action; "block" to stop the agent from finishing
+    reason: str     # plain English, shown to the user (and to the agent for "block")

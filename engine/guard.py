@@ -85,7 +85,7 @@ def check_write(path, texts, pol):
 
 def check(event, pol=None):
     """Return a Decision, or None for no opinion."""
-    pol = pol or policy_mod.load()
+    pol = pol or policy_mod.load().guard
     if event.kind == COMMAND:
         return check_command(event.command, pol)
     if event.kind == WRITE:

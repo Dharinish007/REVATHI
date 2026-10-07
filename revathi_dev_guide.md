@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 2 (Trust) next** · Phase 0 ✅ · Phase 1 ✅ (2026-10-08).
+**Current phase:** **Phase 3 (Safety net) next** · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
 
 ---
 
@@ -225,7 +225,7 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 |---|---|---|---|---|
 | 0 📄 Docs ✅ | Shared understanding | These docs | – | Docs written and reviewed |
 | 1 🧱 Foundation ✅ | Clean base | Folder structure; `core/` rules + skills ported; `engine/event.py`; policy file; guard ported with 2 holes fixed; Claude Code adapter | 5, 3, 10 | Guard tests pass, including both holes and a dangerous-command test set; works live in Claude Code |
-| 2 🧾 Trust | No fake "done" | Proof Stop hook + receipt; recorder | 1, 6 | "Done without proof" is blocked in a live test; every action appears in the log |
+| 2 🧾 Trust ✅ | No fake "done" | Proof Stop hook + receipt; recorder | 1, 6 | "Done without proof" is blocked in a live test; every action appears in the log |
 | 3 ↩️ Safety net | Survive mistakes | Undo snapshot/restore; canary traps | 5, 4 | Seeded destructive action restored by `revathi undo`; canary touch is flagged |
 | 4 ⌨️ Front desk | One-command setup | CLI: install / doctor / mode / undo / log; Antigravity adapter; Windows + Mac/Linux | 13, 12 | Fresh machine → `revathi install` → `revathi doctor` all green in 2 tools |
 | 5 🧪 Proven | Evidence | All evals 3+ runs, baseline vs REVATHI; cost per correct result; CI | 2, 3, 9, 10 | Scorecard shows a verdict for every skill; neutral + costly skills cut |
@@ -257,6 +257,16 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [x] Live test in a real Claude Code session (2026-10-08, project hook): secret in a shell command was blocked with the REVATHI message and no file written · `git -C . rebase --abort` and `find … -delete` asked for confirmation · `ls` ran normally. Caveat: for the two "ask" tests, the REVATHI reason text was not confirmed; Claude Code's default permissions can also ask
 
 **Phase 1 notes:** hook round-trip ≈100 ms, mostly Python startup (target <100 ms; revisit in Phase 4) · skills `add-mcp` and `learn` still point at Agentic OS files (`mcp/registry.md`, `LEARNINGS.md`): adapt when memory lands (Phase 7) · guard false positive seen: fake keys in test fixtures get blocked; tests build them at runtime.
+
+### Phase 2 checklist
+- [x] Confirm from the Claude Code docs that a Stop hook can block finishing (`decision: "block"`, `stop_hook_active`, 8-continuation cap) and that PostToolUseFailure reports failed Bash commands
+- [x] `engine/log.py`: recorder, one JSONL file per session in `~/.revathi/logs/`, hash-chained, secrets redacted, no command output stored
+- [x] `engine/proof.py` + `[proof]` in the policy: after a code edit, finishing is blocked until a check passes; blocks once, then records `unproven`
+- [x] Claude Code adapter handles PreToolUse, PostToolUse, PostToolUseFailure, Stop; `settings.example.json`
+- [x] Tests: `tests/test_proof.py` (12 proof + 4 recorder tests), guard tests unchanged; 23/23 pass
+- [x] Live test in a real Claude Code session (2026-10-08): the agent was told not to test; the proof check sent it back once with the REVATHI reason, and it then told the user plainly the fix was unverified. Log: 7 records, hash chain intact. **Bug found:** the already-disclosed `calc.py` gap blocked the next, docs-only turn too. Fixed (only judge records after the last `unproven`), 2 regression tests added, and a replay of the real log no longer blocks.
+
+**Phase 2 limits (honest):** edits made through shell commands aren't seen as code edits · checks are recognized by command patterns · "passed" = exit 0 and no failure text; it can't judge test quality · each tool call now runs the hook twice (before + after), about 100 ms each.
 
 ### Backlog (later, not now)
 Cross-model second opinion · hidden tests / mutation testing · thinker/doer split · MCP gateway · skill registry with evidence scores · "REVATHI-verified" badge · formal verification (research only).

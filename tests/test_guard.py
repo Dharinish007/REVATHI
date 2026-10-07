@@ -1,7 +1,9 @@
 """Guard tests, end to end through the Claude Code adapter.  Run: python -m unittest discover -s tests"""
 import json
+import os
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -15,8 +17,13 @@ PEM = "-----BEGIN RSA " + "PRIVATE KEY-----"
 WEATHER = 'WEATHER_API_KEY = "wk_live' + '_9f3a7c21d4e84b6fa0c5"'
 
 
+# The hook records blocked actions; keep test logs out of the real ~/.revathi.
+TEST_HOME = tempfile.mkdtemp(prefix="revathi-test-")
+
+
 def run_hook(stdin):
-    out = subprocess.run([sys.executable, str(HOOK)], input=stdin, capture_output=True, text=True)
+    env = {**os.environ, "REVATHI_HOME": TEST_HOME}
+    out = subprocess.run([sys.executable, str(HOOK)], input=stdin, capture_output=True, text=True, env=env)
     assert out.returncode == 0, out.stderr
     return out.stdout
 

@@ -1,0 +1,3 @@
+# Local only: never committed
+.livetest/
+__pycache__/
