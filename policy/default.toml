@@ -32,8 +32,8 @@ reason = "force-pushing to main/master can erase other people's work"
 
 # Memory (D12, D30): agents may propose and read notes; only the user approves, rejects or forgets them.
 [[guard.deny]]
-pattern = '\brevathi(\.py)?[\x22\x27]?\s+memory\s+(approve|reject|forget)\b|\bmemory\.(approve|reject|forget|_append|_write)\s*\('
-reason = "only you can approve, reject or forget memories, so an AI cannot decide what it remembers. Run this command yourself in your own terminal"
+pattern = '\brevathi(\.py)?[\x22\x27]?\s+memory\s+(approve|reject|forget|review)\b|\bmemory\.(approve|reject|forget|_append|_write)\s*\('
+reason = "only you can approve, reject or forget memories (or review suggestions), so an AI cannot decide what it remembers. Run this command yourself in your own terminal"
 
 [[guard.deny]]
 pattern = '(>>?|\btee\b|\b(cp|mv|rm|del|copy|move|sed\s+-i|perl\s+-i|Set-Content|Add-Content|Out-File|Remove-Item|Move-Item|Copy-Item|New-Item|Rename-Item)\b)[^|;&]*\.revathi[\\/]+memory\b'

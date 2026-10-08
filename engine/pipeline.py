@@ -103,6 +103,11 @@ def after(session, event, ok, output="", cwd=""):
     entry = {"event": "post", "ok": ok, **_summary(event, pol)}
     if event.kind == COMMAND and proof.is_check(event.command, pol.proof):
         entry["check"] = "pass" if ok and not proof.output_failed(output, pol.proof) else "fail"
+        if cwd:
+            try:
+                entry["project"] = memory.project_id(cwd)  # lets the learner tell projects apart (hashed path)
+            except OSError:
+                pass
     record(session, event.name, entry)
 
 

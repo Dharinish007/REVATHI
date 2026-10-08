@@ -7,7 +7,7 @@
   revathi log [--session ID] [--all] what the agent did (newest session by default)
   revathi undo [--list] [ID]         restore what an agent action changed or deleted
   revathi canary plant <dir> | status    decoy credentials that reveal hidden instructions
-  revathi memory propose|list|search|show|approve|reject|forget|check   what agents remember (you approve)
+  revathi memory review|learn|propose|list|search|show|approve|reject|forget|check   what agents remember (you approve)
 """
 import argparse
 import getpass
@@ -16,7 +16,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # REVATHI root, for "engine"
 
-from engine import canary, config, log, memory, undo  # noqa: E402
+from engine import canary, config, learn, log, memory, undo  # noqa: E402
 
 try:
     import install as installer  # same folder (cli/)
@@ -129,6 +129,45 @@ def cmd_canary(args):
     return 0
 
 
+def _learn_summary(result):
+    print(f"Learned from your sessions: {len(result['proposed'])} new suggestion(s), "
+          f"{result['episodes']} fix record(s) saved as evidence.")
+
+
+def _review():
+    """Go through the inbox one note at a time. Only a person at a terminal can do this (agents are blocked)."""
+    if not sys.stdin.isatty():
+        print("Review needs you at a terminal: run `revathi memory review` in your own terminal window.")
+        return 1
+    _learn_summary(learn.mine())
+    waiting = memory.notes("inbox")
+    if not waiting:
+        print("Nothing to review. 🎉")
+        return 0
+    user = getpass.getuser()
+    for i, n in enumerate(waiting, 1):
+        m = n["meta"]
+        extra = m.get("x-revathi") or {}
+        print(f"\n[{i}/{len(waiting)}] {m.get('title')}")
+        print(f"  type {m.get('type')} · scope {extra.get('scope', 'user')} · suggested by "
+              f"{(m.get('generated') or {}).get('by', '?')} · risk {extra.get('risk', '?')}")
+        print(f"  from: {', '.join(map(str, m.get('sources') or []))}")
+        print("  " + n["body"].strip().replace("\n", "\n  "))
+        while True:
+            answer = input("  [a]pprove  [r]eject  [s]kip  [q]uit > ").strip().lower()[:1]
+            if answer in ("a", "r", "s", "q"):
+                break
+        if answer == "q":
+            break
+        if answer == "a":
+            memory.approve(n["id"], by=user)
+            print("  ✅ approved: agents will use this from their next session")
+        elif answer == "r":
+            memory.reject(n["id"])
+            print("  ❌ rejected: archived, and it will not be suggested again")
+    return 0
+
+
 def cmd_memory(args):
     try:
         if args.action == "propose":
@@ -145,6 +184,10 @@ def cmd_memory(args):
             for n in found:
                 m = n["meta"]
                 print(f"{n['id']}  {m.get('type', '?'):<10}  {m.get('title', '')}")
+        elif args.action == "learn":
+            _learn_summary(learn.mine())
+        elif args.action == "review":
+            return _review()
         elif args.action == "search":
             found = memory.search(" ".join(args.words), cwd=str(Path.cwd()), k=args.limit)
             if not found:
@@ -230,6 +273,8 @@ def main(argv=None):
     q = msub.add_parser("list", help="approved notes (or --inbox / --archive)")
     q.add_argument("--inbox", action="store_true")
     q.add_argument("--archive", action="store_true")
+    msub.add_parser("learn", help="turn your recent sessions into suggestions (nothing is approved)")
+    msub.add_parser("review", help="approve or reject suggestions one by one (in your own terminal)")
     q = msub.add_parser("search", help="find approved notes that match some words")
     q.add_argument("words", nargs="+")
     q.add_argument("--limit", type=int, default=5)

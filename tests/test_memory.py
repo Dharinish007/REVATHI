@@ -189,8 +189,10 @@ class Recall(Base):
             shutil.rmtree(work, ignore_errors=True)
             shutil.rmtree(other, ignore_errors=True)
 
-    def test_empty_memory_gives_nothing(self):
-        self.assertEqual(memory.index_text("", ""), "")
+    def test_empty_memory_gives_short_hint(self):
+        text = memory.index_text("", "")
+        self.assertIn("revathi memory propose", text)
+        self.assertLess(len(text), 400)
 
     def test_index_respects_limit(self):
         for i in range(40):
@@ -213,9 +215,10 @@ class Recall(Base):
         self.assertEqual(out["hookSpecificOutput"]["hookEventName"], "SessionStart")
         self.assertIn("User likes tables", out["hookSpecificOutput"]["additionalContext"])
 
-    def test_claude_code_no_memory_no_output(self):
-        self.assertIsNone(run_hook("claude-code", "SessionStart", {"session_id": "s1",
-                                                                   "hook_event_name": "SessionStart"}, self.home))
+    def test_claude_code_no_memory_only_hint(self):
+        out = run_hook("claude-code", "SessionStart", {"session_id": "s1", "hook_event_name": "SessionStart"},
+                       self.home)
+        self.assertIn("memory is empty", out["hookSpecificOutput"]["additionalContext"])
 
     def test_antigravity_injects_before_every_model_call(self):
         self.approve_note(title="User likes tables", type="preference")

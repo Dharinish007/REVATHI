@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · next 7d Notice + review (plan in §8).**
+**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · next 7e Tidy (plan in §8).**
 
 ---
 
@@ -363,6 +363,14 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - Tests: 12 new (28 memory tests), full suite 100/100. Poisoning set (planted file, forged approval, injected text, secret, unsourced, edited-after-approval, self-approve) → nothing reaches the session ✅ (Phase 7 criterion, unit level).
 - ⚠️ Speed: `index_text` over 1,000 notes = ~82 ms on this Windows machine (target was <20 ms); mostly file opens. 💭 Fine for realistic sizes (tens to low hundreds of notes); backlog: a verified cache keyed by file size + mtime.
 - Not covered by the shield (honest): writes through other programs (e.g. a Python script that writes the files) and a custom `REVATHI_HOME` path in shell commands. Such files are still ignored, because they lack a matching approval in `log.md`.
+
+**7d status ✅ (2026-10-08):** `engine/learn.py` + `revathi memory learn | review`.
+- Learner (offline, D32): fail → code change → pass in one session = **episode** (auto-recorded evidence in `episodes/`, never shown to agents); the same check passing in ≥3 sessions of one project = **fact suggestion** to the inbox. Every suggestion has a `key`, so waiting, approved, rejected or forgotten ones never come back. Checks are now recorded with a hashed project id.
+- Review: `revathi memory review` runs the learner, then a/r/s/q per note; needs a real terminal (stdin is a tty) and the guard denies it for agents. Session start mentions waiting suggestions.
+- Agents learn when to propose from a one-line hint in the session-start message (shown even when memory is empty), because `core/AGENTS.md` is never installed into tools (D20). `core/AGENTS.md` got a Memory section too.
+- Tests `tests/test_learn.py` (12); full suite 112/112. **Live:** on this machine's real logs the learner found 3 genuine fix episodes and 0 facts (older logs have no project id).
+- Not done (honest): learning from user corrections (needs D35); repeated command sequences → lessons (moved to 7f); the `learn` skill still points at Agentic OS files; "10 reviewed in <2 min" not timed with a real user yet. 💭 One live episode lumps files from a long session together.
+- Developer note: the shield's command patterns also match those words inside other commands (e.g. a commit message or edit script that mentions them); during REVATHI development use files for such text.
 
 **Releases:** 7a–7c = v1.1 (safe memory) · 7d–7e = v1.2 (learns) · 7f–7h = v1.3 (expert + graph).
 **Cost (💭):** ≤ ~2,500 tokens injected per session; learning uses no model tokens.
