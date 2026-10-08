@@ -69,7 +69,7 @@ def hook_cmd(tool, *args, quoted=True):
     """Command line for a hook. Antigravity runs hooks with `cmd /c` on Windows, which passes quotes through to
     Python literally (seen live 2026-10-08), so its command is unquoted; a path with spaces uses the short form."""
     script = app_dir() / "adapters" / tool / "hook.py"
-    if quoted:
+    if quoted or os.name != "nt":  # only cmd /c mangles quotes; sh -c needs them for paths with spaces
         return " ".join([python_cmd(), f'"{script.as_posix()}"', *args])
     if " " in str(script) and os.name == "nt":
         script = _short_path(script)
