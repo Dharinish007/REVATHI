@@ -182,3 +182,67 @@ class RecorderTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ObserveAndSubagents(unittest.TestCase):
+    """observe mode (audit only) and per-subagent logs (agent_id) + SubagentStop."""
+
+    def setUp(self):
+        self.home = tempfile.mkdtemp(prefix="revathi-test-")
+        self.s = Session(self.home)
+
+    def tearDown(self):
+        shutil.rmtree(self.home, ignore_errors=True)
+
+    def set_mode(self, mode):
+        Path(self.home, "config.json").write_text(json.dumps({"mode": mode}), encoding="utf-8")
+
+    def test_observe_never_interrupts_but_records(self):
+        self.set_mode("observe")
+        pre = self.s.send({"hook_event_name": "PreToolUse", "tool_name": "Bash", "cwd": self.home,
+                           "tool_input": {"command": "git reset --hard"}})
+        self.assertIsNone(pre)
+        self.s.edit("app.py")
+        self.assertIsNone(self.s.stop())
+        verdicts = [(r["event"], r.get("verdict")) for r in self.s.records() if r["event"] in ("pre", "stop")]
+        self.assertEqual(verdicts, [("pre", "would-ask"), ("stop", "unproven")])
+        self.assertFalse(Path(self.home, "snapshots").exists(), "observe mode takes no snapshots")
+
+    def test_subagent_has_its_own_log_and_proof(self):
+        sub = {"agent_id": "a1", "agent_type": "general-purpose"}
+        self.s.send({"hook_event_name": "PostToolUse", "tool_name": "Edit", **sub,
+                     "tool_input": {"file_path": "sub.py", "new_string": "x"}, "tool_response": {}})
+        self.assertIsNone(self.s.stop(), "the parent did not change code")
+        out = self.s.send({"hook_event_name": "SubagentStop", "stop_hook_active": False, **sub})
+        self.assertEqual(out["decision"], "block")
+        self.assertIn("sub.py", out["reason"])
+        self.assertEqual(self.s.records(), [r for r in self.s.records() if r.get("path") != "sub.py"])
+
+
+class ShellEdits(unittest.TestCase):
+    """Eval pilot 2026-10-08: an agent edited code with `sed -i` in Bash, so REVATHI never saw a code change."""
+
+    def setUp(self):
+        self.home = tempfile.mkdtemp(prefix="revathi-test-")
+        self.s = Session(self.home)
+
+    def tearDown(self):
+        shutil.rmtree(self.home, ignore_errors=True)
+
+    def test_shell_edits_need_proof(self):
+        for command in ("sed -i 's/a/b/' inventory.py", "perl -pi -e 's/a/b/' app.js",
+                        "echo 'x = 1' > config.py", "cat <<EOF >> main.go", "Set-Content -Path app.ps1 -Value x"):
+            with self.subTest(command=command):
+                s = Session(self.home, sid=command[:8])
+                s.run(command)
+                self.assertIsNotNone(s.stop(), command)
+
+    def test_edit_and_test_in_one_command_counts_as_verified(self):
+        self.s.run("sed -i 's/a/b/' inventory.py && python -m unittest -q", stdout="OK")
+        self.assertIsNone(self.s.stop())
+
+    def test_writing_non_code_or_reading_is_not_an_edit(self):
+        self.s.run("echo hi > notes.txt")
+        self.s.run("cat inventory.py")
+        self.s.run("grep -n x app.py > /dev/null")
+        self.assertIsNone(self.s.stop())

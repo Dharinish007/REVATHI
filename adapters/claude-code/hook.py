@@ -2,7 +2,9 @@
 
   PreToolUse                      -> pipeline.before: ask / deny / no output
   PostToolUse, PostToolUseFailure -> pipeline.after
-  Stop                            -> pipeline.finish: {"decision": "block"} once per code change
+  Stop, SubagentStop              -> pipeline.finish: {"decision": "block"} once per code change
+A subagent's events carry agent_id; they get their own log (<session>.<agent_id>), so its proof check judges
+only its own work and the parent's log stays clean.
 
 Always exits 0. If anything here breaks, the agent carries on (the guard itself fails safe inside the pipeline).
 """
@@ -48,7 +50,9 @@ def to_event(raw):
 def handle(raw):
     name = raw.get("hook_event_name", "PreToolUse")
     session = str(raw.get("session_id", ""))
-    if name == "Stop":
+    if raw.get("agent_id"):
+        session = f"{session}.{raw['agent_id']}"
+    if name in ("Stop", "SubagentStop"):
         decision = pipeline.finish(session, sent_back=bool(raw.get("stop_hook_active")))
         if decision:
             return {"decision": "block", "reason": f"REVATHI proof check: {decision.reason}"}

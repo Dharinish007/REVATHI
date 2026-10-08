@@ -1,7 +1,27 @@
 """Proof: the agent may not finish a turn in which it changed code until a check has passed after the last change."""
 import os
+import re
 
 from engine.event import Decision
+
+# Where a shell command writes files: redirects, tee, PowerShell writers (same shape as the guard's secret check).
+_REDIRECT = re.compile(
+    r"""(?:>>?|\btee\s+(?:-a\s+)?|\b(?:Out-File|Set-Content|Add-Content)\s+(?:-(?:File)?Path\s+)?)\s*["']?([^\s"'|;&>]+)""",
+    re.I)
+_IN_PLACE = re.compile(r"\b(sed|perl)\b[^|;&]*\s-\w*i", re.I)  # sed -i, perl -pi
+
+
+def shell_edits(command, pol):
+    """Code files a shell command writes (sed -i, perl -i, >, >>, tee, Set-Content, Out-File)."""
+    paths = [p for p in _REDIRECT.findall(command)]
+    for segment in re.split(r"[|;&]+", command):
+        if _IN_PLACE.search(segment):
+            paths += [w.strip("\"'") for w in segment.split()[1:]]
+    seen = []
+    for p in paths:
+        if is_code(p, pol) and p not in seen:
+            seen.append(p)
+    return seen
 
 
 def is_check(command, pol):

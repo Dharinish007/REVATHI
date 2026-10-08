@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 4 (Front desk) 🔨 in progress** · Phase 3 ✅ (2026-10-08) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
+**Current phase:** **Phase 5 (Proven) 🔨 in progress** · Phase 4 ✅ built (Antigravity live test pending) · Phase 3 ✅ (2026-10-08) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
 
 ---
 
@@ -228,7 +228,7 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 | 2 🧾 Trust ✅ | No fake "done" | Proof Stop hook + receipt; recorder | 1, 6 | "Done without proof" is blocked in a live test; every action appears in the log |
 | 3 ↩️ Safety net ✅ | Survive mistakes | Undo snapshot/restore; canary traps | 5, 4 | Seeded destructive action restored by `revathi undo`; canary touch is flagged |
 | 4 ⌨️ Front desk 🔨 | One-command setup | CLI: install / doctor / mode / undo / log; Antigravity adapter; Windows + Mac/Linux | 13, 12 | Fresh machine → `revathi install` → `revathi doctor` all green in 2 tools |
-| 5 🧪 Proven | Evidence | All evals 3+ runs, baseline vs REVATHI; cost per correct result; CI | 2, 3, 9, 10 | Scorecard shows a verdict for every skill; neutral + costly skills cut |
+| 5 🧪 Proven 🔨 | Evidence | All evals 3+ runs, baseline vs REVATHI; cost per correct result; CI | 2, 3, 9, 10 | Scorecard shows a verdict for every skill; neutral + costly skills cut |
 | 6 🚀 Launch | Public v1 | GitHub release, Claude Code plugin, PyPI; real README; license | – | A new user installs from a public channel and passes the quick start |
 | 7 🧠 Memory | Second brain | Memory store, index, search, approval, expiry | 7, 8 | Facts survive across sessions and 2 tools; a planted bad memory is rejected |
 | 8 🌍 Expand | Reach + scale | Codex, Cursor, Gemini, OpenCode adapters; starter packs; long-task evals; team mode | 11, 12, 14, 15 | Same skill passes the same eval in 3+ tools |
@@ -290,6 +290,18 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [ ] Live test in Antigravity. **Antigravity IDE** loads REVATHI's hooks (its log), the quoting fix is untested live there. **Antigravity 2.0** (v2.15.0) shows no hooks loading at all, though its bundled docs say `~/.gemini/config/hooks.json` is read; REVATHI skills do reach it. Cause unknown ❓
 
 **Phase 4 notes:** live: Antigravity hooks loaded but failed (quoted path under `cmd /c`) → fixed; `ask` → `force_ask` (D24) · the real-machine dry run found a crash the tests missed (`claude plugin list` prints `❯`, Windows decoded it wrongly) → fixed + test · the "disabled" wording of `claude plugin list` is assumed, not seen yet.
+
+### Phase 5 checklist
+- [x] `revathi mode observe` (audit only) so baseline runs also produce an objective log
+- [x] Subagents: own log per `agent_id`; `SubagentStop` proof check; installer registers it
+- [x] Shell code edits (`sed -i`, `perl -i`, `>`, `>>`, `tee`, `Set-Content`) count as code edits (found in the eval pilot: an agent edited with `sed -i` and REVATHI saw no change)
+- [x] `evals/` harness: prepare / grade / scorecard; tasks `verify-feature`, `debug-pagination`, new pressure task `rush-fix`
+- [x] Batch 1: 3 tasks × 3 runs × A/B (18 runs) → `evals/SCORECARD.md`
+- [ ] Top-level-session runs (Stop block works there): needs headless CLI login or manual runs
+- [ ] Explain why `SubagentStop` blocks did not continue in-app subagents
+- [ ] Weaker-model runs; CI (tests on every change); skill verdicts with cost
+
+**Batch 1 result (honest):** pass 8/9 → 8/9, verified 6/9 → 7/9, honest 9/9 → 9/9, tokens 57k → 57k. REVATHI detected every unverified finish but could not enforce it on in-app subagents. Neutral on outcome, zero model cost.
 
 ### Backlog (later, not now)
 Cross-model second opinion · hidden tests / mutation testing · thinker/doer split · MCP gateway · skill registry with evidence scores · "REVATHI-verified" badge · formal verification (research only).

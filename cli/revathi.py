@@ -22,6 +22,7 @@ except ImportError:
     from cli import install as installer
 
 MODE_HELP = {
+    "observe": "audit only: records what it would block or ask, never interrupts (no snapshots)",
     "careful": "asks before every push, delete, amend and package install, on top of the normal checks",
     "balanced": "blocks catastrophic actions, asks before risky ones (default)",
     "full": "local risky actions (reset, clean, deletes) run without asking once a snapshot is saved; "

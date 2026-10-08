@@ -3,7 +3,7 @@ import json
 
 from engine import log
 
-MODES = ("careful", "balanced", "full")
+MODES = ("observe", "careful", "balanced", "full")
 DEFAULT_MODE = "balanced"
 
 

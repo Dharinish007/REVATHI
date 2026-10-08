@@ -1,6 +1,7 @@
 """The tool-neutral flow for every hook event. Adapters translate their tool's events into these three calls.
 
   before(...)  canary -> guard -> mode -> snapshot -> record; returns a Decision (ask/deny) or None
+               (observe mode: records what it would have done, never interrupts)
   after(...)   record what ran or changed, and whether a check passed
   finish(...)  proof check; returns a "block" Decision once per code change, else None
 """
@@ -60,6 +61,11 @@ def before(session, cwd, event, tool_input):
         pass  # the canary is an extra alarm; the guard below still runs
     if not decision and event.kind != OTHER:
         decision = _guard(event, mode, pol)
+    if mode == "observe":  # audit only: record what REVATHI would have done, never interrupt
+        if decision:
+            record(session, event.name, {"event": "pre", "verdict": "would-" + decision.verdict, "mode": "observe",
+                                         "reason": decision.reason, **_summary(event, pol)})
+        return None
     if event.kind != OTHER and not (decision and decision.verdict == "deny"):
         try:
             snap = _snapshot(session, cwd, event, decision, pol)
@@ -85,6 +91,9 @@ def after(session, event, ok, output=""):
     if event.kind == OTHER:
         return
     pol = policy_mod.load()
+    if event.kind == COMMAND:  # code edited through the shell counts as a code edit (recorded before any check)
+        for path in proof.shell_edits(event.command, pol.proof):
+            record(session, event.name, {"event": "post", "ok": True, "kind": WRITE, "path": path, "via": "command"})
     entry = {"event": "post", "ok": ok, **_summary(event, pol)}
     if event.kind == COMMAND and proof.is_check(event.command, pol.proof):
         entry["check"] = "pass" if ok and not proof.output_failed(output, pol.proof) else "fail"
@@ -98,6 +107,9 @@ def finish(session, sent_back=False):
     decision = proof.check(records, pol.proof)
     if not decision:
         return None
+    if config.mode() == "observe":
+        record(session, "", {"event": "stop", "verdict": "unproven", "mode": "observe", "reason": decision.reason})
+        return None  # audit only: the gap is recorded, the agent is not sent back
     if sent_back or proof.already_sent_back(records, pol.proof):
         record(session, "", {"event": "stop", "verdict": "unproven", "reason": decision.reason})
         return None  # already sent back once: let it finish, the log keeps the gap visible

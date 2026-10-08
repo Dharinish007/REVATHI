@@ -29,6 +29,7 @@ CLAUDE_EVENTS = {
     "PostToolUse": "Bash|PowerShell|Write|Edit|MultiEdit",
     "PostToolUseFailure": "Bash|PowerShell|Write|Edit|MultiEdit",
     "Stop": None,
+    "SubagentStop": None,
 }
 AG_PRE = "run_command|write_to_file|replace_file_content|multi_replace_file_content|view_file|read_url_content|search_web"
 AG_POST = "run_command|write_to_file|replace_file_content|multi_replace_file_content"
