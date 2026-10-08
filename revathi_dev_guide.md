@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 5 (Proven) 🔨 in progress** · Phase 4 ✅ built (Antigravity live test pending) · Phase 3 ✅ (2026-10-08) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
+**Current phase:** **Phase 6 (Launch) next: needs decisions (license, own repo)** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
 
 ---
 
@@ -228,7 +228,7 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 | 2 🧾 Trust ✅ | No fake "done" | Proof Stop hook + receipt; recorder | 1, 6 | "Done without proof" is blocked in a live test; every action appears in the log |
 | 3 ↩️ Safety net ✅ | Survive mistakes | Undo snapshot/restore; canary traps | 5, 4 | Seeded destructive action restored by `revathi undo`; canary touch is flagged |
 | 4 ⌨️ Front desk 🔨 | One-command setup | CLI: install / doctor / mode / undo / log; Antigravity adapter; Windows + Mac/Linux | 13, 12 | Fresh machine → `revathi install` → `revathi doctor` all green in 2 tools |
-| 5 🧪 Proven 🔨 | Evidence | All evals 3+ runs, baseline vs REVATHI; cost per correct result; CI | 2, 3, 9, 10 | Scorecard shows a verdict for every skill; neutral + costly skills cut |
+| 5 🧪 Proven ✅ | Evidence | All evals 3+ runs, baseline vs REVATHI; cost per correct result; CI | 2, 3, 9, 10 | Scorecard shows a verdict for every skill; neutral + costly skills cut |
 | 6 🚀 Launch | Public v1 | GitHub release, Claude Code plugin, PyPI; real README; license | – | A new user installs from a public channel and passes the quick start |
 | 7 🧠 Memory | Second brain | Memory store, index, search, approval, expiry | 7, 8 | Facts survive across sessions and 2 tools; a planted bad memory is rejected |
 | 8 🌍 Expand | Reach + scale | Codex, Cursor, Gemini, OpenCode adapters; starter packs; long-task evals; team mode | 11, 12, 14, 15 | Same skill passes the same eval in 3+ tools |
@@ -301,8 +301,9 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [x] Explain why `SubagentStop` blocks did not continue in-app subagents: the report is delivered via `SubagentHandback` before `SubagentStop`; the proof check now gates the handback. Batch 2: pressure task verified 0/3 → 2/3 (see `evals/FINDINGS.md`)
 - [x] CI: `.github/workflows/revathi-tests.yml` (Windows, Linux, macOS × Python 3.11/3.13)
 - [x] Name the project's test files in the send-back reason; batch 3: pressure task B 5/5 pass and verified. Totals A → B: pass 4/5 → 7/8, verified 1/5 → 7/8, tokens per correct 72k → 66k (see `evals/FINDINGS.md`)
-- [ ] More pressure tasks (hidden failure behind `| tail`, "just push it") so the gain isn't one task's quirk
-- [ ] Weaker-model runs; skill verdicts with cost
+- [x] Second pressure task `quick-rename` (batch 4): ceiling effect, 0 send-backs needed
+- [x] Verdict per REVATHI part in `evals/FINDINGS.md` (proof 🟡 promising, guard/undo/recorder ✅, cost negligible)
+- [ ] (backlog) Weaker-model and top-level-session runs; skill verdicts with cost; tasks from real failures
 
 **Batch 1 result (honest):** pass 8/9 → 8/9, verified 6/9 → 7/9, honest 9/9 → 9/9, tokens 57k → 57k. REVATHI detected every unverified finish but could not enforce it on in-app subagents. Neutral on outcome, zero model cost.
 

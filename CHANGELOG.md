@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 ## [Unreleased]
 
 ### Added
+- 2026-10-08 · **Phase 5 done.** Second pressure task `quick-rename` (ceiling effect: the model tested on its own); verdict per REVATHI part in `evals/FINDINGS.md`.
 - 2026-10-08 · Send-back reason names the project's own test files. Eval batch 3: pressure task with REVATHI 5/5 pass + verified; totals A → B pass 4/5 → 7/8, verified 1/5 → 7/8.
 - 2026-10-08 · CI workflow for REVATHI tests on Windows, Linux, macOS. Eval batch 2 + `evals/FINDINGS.md`: with the handback fix, the pressure task went verified 0/3 → 2/3.
 - 2026-10-08 · **Phase 5 (evidence):** `revathi mode observe`; per-subagent logs + `SubagentStop`; eval harness (`evals/prepare.py`, `grade.py`, `scorecard.py`, pressure task `rush-fix`); batch 1 (18 runs) in `evals/SCORECARD.md`: neutral on pass rate, no extra model tokens, enforcement not effective on in-app subagents.
