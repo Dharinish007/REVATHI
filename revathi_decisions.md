@@ -8,7 +8,7 @@ Agents may add *Proposed* entries. Only the user accepts them.
 |---|---|---|---|---|
 | D1 | Name the project **REVATHI**, built from scratch | Accepted | A fresh start focused on trust; Agentic OS is reference only | 2026-10-08 |
 | D2 | Use standard file names: `README.md`, `CHANGELOG.md`, `AGENTS.md`, `CLAUDE.md`; `revathi_` prefix only for custom docs | Accepted | GitHub and AI tools auto-detect only the exact standard names | 2026-10-08 |
-| D3 | Keep `REVATHI/` inside the Agentic OS folder and repo **for now** | Accepted | Easy reuse while starting. Known risks: Agentic OS rules may also load; files commit to the Agentic OS repo. Revisit before launch. | 2026-10-08 |
+| D3 | Keep `REVATHI/` inside the Agentic OS folder and repo **for now** | Replaced by D26 | Easy reuse while starting. Known risks: Agentic OS rules may also load; files commit to the Agentic OS repo. Revisit before launch. | 2026-10-08 |
 | D4 | Promise **trust, not intelligence**; no AGI claims | Accepted | Rules can't make a model smarter; overclaiming destroys trust | 2026-10-08 |
 | D5 | Problem list and priority order in the dev guide §4 | Accepted | Agreed in planning (2026-10-07/08) | 2026-10-08 |
 | D6 | Two layers: **Markdown = advice**, **code at hooks = enforcement** | Proposed | An AI can skip instructions; it can't skip a hook. Safety needs enforcement. | 2026-10-08 |

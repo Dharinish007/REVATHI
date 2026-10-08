@@ -10,7 +10,7 @@ readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.11"
-authors = [{ name = "Dharinish007" }]
+authors = [{ name = "DHARINISH A" }]
 keywords = ["ai-agents", "claude-code", "antigravity", "hooks", "safety", "guardrails"]
 classifiers = [
   "Development Status :: 4 - Beta",

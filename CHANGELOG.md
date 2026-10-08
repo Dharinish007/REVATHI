@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 ## [Unreleased]
 
 ## [1.0.0rc1] - 2026-10-08 (prepared, not yet published)
+Moved to its own repo: https://github.com/Dharinish007/REVATHI (history kept).
 Everything below under "Unreleased" ships in this release candidate. Packaging: `pip install revathi` → `revathi` command; MIT license; standalone-repo CI with a wheel content check.
 
 ### Added

@@ -31,10 +31,9 @@ Read only the sections you need. The guide is the source of truth; if code and g
 9. **Plain-English output.** Every message REVATHI shows a user (blocks, warnings, reports) must make sense to a non-coder: what happened, why, what to do next.
 10. **Lean context.** Keep `AGENTS.md` and skills short. Prefer a skill loaded on demand over another always-on rule.
 
-## 4. Using Agentic OS (the parent folder)
-- `../` (Agentic OS) is **reference material**. Reuse what helps (see guide §7), but **copy** it into `REVATHI/` and adapt it there.
-- **Never edit Agentic OS files** while working on REVATHI unless the user asks.
-- Agentic OS rules may also load because this folder sits inside it. For REVATHI work, this file wins where they differ.
+## 4. Origins: Agentic OS
+- REVATHI began inside the Agentic OS repo (https://github.com/Dharinish007/Agentic-OS) and moved to its own repo at launch (D26). Its history came along.
+- Agentic OS is **reference material only**. Copy what helps into this repo and adapt it here; never edit Agentic OS from REVATHI work unless the user asks.
 
 ## 5. Records
 - **`CHANGELOG.md`:** every change you make, under `[Unreleased]`, newest first. Say what changed and why, in one line each.
