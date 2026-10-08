@@ -4,10 +4,11 @@
                (observe mode: records what it would have done, never interrupts)
   after(...)   record what ran or changed, and whether a check passed
   finish(...)  proof check; returns a "block" Decision once per code change, else None
+  recall(...)  approved memory for the start of a session (text), else None
 """
 import os
 
-from engine import canary, config, guard, log, proof, undo
+from engine import canary, config, guard, log, memory, proof, undo
 from engine import policy as policy_mod
 from engine.event import COMMAND, OTHER, WRITE, Decision
 
@@ -103,6 +104,19 @@ def after(session, event, ok, output="", cwd=""):
     if event.kind == COMMAND and proof.is_check(event.command, pol.proof):
         entry["check"] = "pass" if ok and not proof.output_failed(output, pol.proof) else "fail"
     record(session, event.name, entry)
+
+
+def recall(session, name, cwd="", once=False):
+    """Approved memory to show at the start of a session, or None. once=True: at most once per session."""
+    try:
+        if once and any(r.get("event") == "recall" for r in log.read(session)):
+            return None
+        text = memory.index_text(cwd, name)
+    except Exception:
+        return None  # memory is a help, not a safety check: if it breaks, the session starts without it
+    if text:
+        record(session, name, {"event": "recall", "chars": len(text)})
+    return text or None
 
 
 def finish(session, sent_back=False):

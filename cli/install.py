@@ -30,6 +30,7 @@ CLAUDE_EVENTS = {
     "PostToolUseFailure": "Bash|PowerShell|Write|Edit|MultiEdit",
     "Stop": None,
     "SubagentStop": None,
+    "SessionStart": None,
 }
 AG_PRE = "run_command|write_to_file|replace_file_content|multi_replace_file_content|view_file|read_url_content|search_web"
 AG_POST = "run_command|write_to_file|replace_file_content|multi_replace_file_content"
@@ -240,6 +241,8 @@ def install(dry=False):
             "PostToolUse": [{"matcher": AG_POST, "hooks": [
                 {"type": "command", "command": hook_cmd("antigravity", "PostToolUse", quoted=False), "timeout": 10}]}],
             "Stop": [{"type": "command", "command": hook_cmd("antigravity", "Stop", quoted=False), "timeout": 10}],
+            "PreInvocation": [{"type": "command", "command": hook_cmd("antigravity", "PreInvocation", quoted=False),
+                               "timeout": 10}],
         }
         _write_json(hooks_path, data, report, backups / "antigravity")
         report.say("+", "hooks.json: 'revathi' group added (other groups kept; backup saved)")
@@ -380,8 +383,8 @@ def doctor():
     if "antigravity" in record:
         lines.append("Antigravity")
         group = _read_json(antigravity_dir() / "hooks.json").get("revathi", {})
-        check(group.get("enabled") is True and all(k in group for k in ("PreToolUse", "PostToolUse", "Stop")),
-              "hooks connected (PreToolUse, PostToolUse, Stop)", "hooks missing: run `revathi install`")
+        check(group.get("enabled") is True and all(k in group for k in ("PreToolUse", "PostToolUse", "Stop", "PreInvocation")),
+              "hooks connected (PreToolUse, PostToolUse, Stop, PreInvocation)", "hooks missing: run `revathi install`")
         command = (group.get("PreToolUse") or [{}])[0].get("hooks", [{}])[0].get("command", "")
         check(_probe(shell_argv(command), {"conversationId": "doctor", "toolCall": {
                   "name": "run_command", "args": {"CommandLine": danger, "Cwd": "."}}}, cwd=antigravity_dir()),

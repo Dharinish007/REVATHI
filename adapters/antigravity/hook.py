@@ -1,10 +1,11 @@
 """Antigravity hook for REVATHI: translate Antigravity events for engine/pipeline.py and answer in its format.
 
-Called as `hook.py <PreToolUse|PostToolUse|Stop>` (Antigravity's input has no event-name field).
+Called as `hook.py <PreToolUse|PostToolUse|Stop|PreInvocation>` (Antigravity's input has no event-name field).
 Input (camelCase): conversationId, workspacePaths, toolCall {name, args}; PostToolUse adds `error` (empty on success).
   PreToolUse  -> {"decision": "deny"|"force_ask", "reason": ...} or {}
   PostToolUse -> {}
   Stop        -> {"decision": "continue", "reason": ...} once per code change (sends the agent back), else {}
+  PreInvocation -> {"injectSteps": [{"ephemeralMessage": <approved memory>}]} once per conversation, else {}
 Antigravity has no "already sent back" flag; the engine tracks that in the session log.
 Always exits 0. If anything here breaks, the agent carries on (the guard itself fails safe inside the pipeline).
 """
@@ -52,6 +53,9 @@ def _cwd(raw):
 
 def handle(name, raw):
     session = str(raw.get("conversationId", ""))
+    if name == "PreInvocation":  # fires before every model call: inject memory once per conversation
+        text = pipeline.recall(session, TOOL, _cwd(raw), once=True)
+        return {"injectSteps": [{"ephemeralMessage": text}]} if text else {}
     if name == "Stop":
         decision = pipeline.finish(session)
         return {"decision": "continue", "reason": f"REVATHI proof check: {decision.reason}"} if decision else {}

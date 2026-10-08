@@ -3,6 +3,7 @@
   PreToolUse                      -> pipeline.before: ask / deny / no output
   PostToolUse, PostToolUseFailure -> pipeline.after
   Stop, SubagentStop              -> pipeline.finish: {"decision": "block"} once per code change
+  SessionStart                    -> pipeline.recall: approved memory as additionalContext
 SubagentHandback (PreToolUse) -> pipeline.finish too: a subagent delivers its report before it stops.
 A subagent's events carry agent_id; they get their own log (<session>.<agent_id>), so its proof check judges
 only its own work and the parent's log stays clean.
@@ -53,6 +54,9 @@ def handle(raw):
     session = str(raw.get("session_id", ""))
     if raw.get("agent_id"):
         session = f"{session}.{raw['agent_id']}"
+    if name == "SessionStart":
+        text = pipeline.recall(session, TOOL, str(raw.get("cwd", "")))
+        return {"hookSpecificOutput": {"hookEventName": "SessionStart", "additionalContext": text}} if text else None
     if name in ("Stop", "SubagentStop"):
         decision = pipeline.finish(session, sent_back=bool(raw.get("stop_hook_active")))
         if decision:

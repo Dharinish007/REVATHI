@@ -7,7 +7,7 @@
   revathi log [--session ID] [--all] what the agent did (newest session by default)
   revathi undo [--list] [ID]         restore what an agent action changed or deleted
   revathi canary plant <dir> | status    decoy credentials that reveal hidden instructions
-  revathi memory propose|list|show|approve|reject|forget|check   what agents remember (you approve)
+  revathi memory propose|list|search|show|approve|reject|forget|check   what agents remember (you approve)
 """
 import argparse
 import getpass
@@ -145,6 +145,12 @@ def cmd_memory(args):
             for n in found:
                 m = n["meta"]
                 print(f"{n['id']}  {m.get('type', '?'):<10}  {m.get('title', '')}")
+        elif args.action == "search":
+            found = memory.search(" ".join(args.words), cwd=str(Path.cwd()), k=args.limit)
+            if not found:
+                print("No approved memory matches that.")
+            for n in found:
+                print(memory._line(n).rstrip()[2:])
         elif args.action == "show":
             n = memory._record(memory._find(args.id))
             m = n["meta"]
@@ -224,6 +230,9 @@ def main(argv=None):
     q = msub.add_parser("list", help="approved notes (or --inbox / --archive)")
     q.add_argument("--inbox", action="store_true")
     q.add_argument("--archive", action="store_true")
+    q = msub.add_parser("search", help="find approved notes that match some words")
+    q.add_argument("words", nargs="+")
+    q.add_argument("--limit", type=int, default=5)
     for name, text in (("show", "show one note"), ("approve", "approve a note from the inbox"),
                        ("reject", "reject a note (kept in the archive)"), ("forget", "retire an approved note")):
         msub.add_parser(name, help=text).add_argument("id")

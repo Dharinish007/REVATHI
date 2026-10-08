@@ -1,7 +1,9 @@
 """Guard: decide deny / ask / no opinion for one Event, using the policy file."""
 import os
 import re
+from pathlib import Path
 
+from engine import memory
 from engine import policy as policy_mod
 from engine.event import COMMAND, WRITE, Decision
 
@@ -72,7 +74,18 @@ def check_command(command, pol):
     return None
 
 
+def _in_memory_store(path):
+    try:
+        Path(path).resolve().relative_to(memory.root().resolve())
+        return True
+    except (ValueError, OSError):
+        return False
+
+
 def check_write(path, texts, pol):
+    if path and _in_memory_store(path):
+        return Decision("deny", "this would change REVATHI's memory files directly. "
+                                "Agents may only suggest notes with `revathi memory propose`; you approve them")
     if _is_env_file(path, pol):
         return None  # .env files are the right place for secrets
     name = os.path.basename(str(path).replace("\\", "/")) or "a file"

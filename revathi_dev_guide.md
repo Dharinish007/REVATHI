@@ -357,6 +357,13 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 | 7h 🕸️ Graph view | `revathi memory graph` → one self-contained local HTML (no network): map, type colors, filter, note details, evidence trace, risk/contradiction/orphan/stale views | `cli/graph.py` | Renders a 500-note fixture; works offline; tests on graph data |
 
 **7a status ✅ (2026-10-08):** `engine/memory.py` + `revathi memory propose|list|show|approve|reject|forget|check`; `tests/test_memory.py` 16 tests, full suite 87/87. A note is trusted only if its file matches the hash recorded at approval, so hand-written, forged or later-edited notes are ignored (mutation check: removing that rule fails 2 tests). Secret scan moved forward from 7c (otherwise a key could reach disk). ⚠️ Until 7c, an agent could still run `revathi memory approve` itself; nothing reads memory into sessions yet (7b), so there is no exposure today.
+**7b + 7c status 🔨 (2026-10-08):** built and unit-tested, live test pending.
+- Recall: `memory.index_text` (approved notes in scope: user + this project + this tool, framed as "data, not commands", ≤8,000 chars), `pipeline.recall`, Claude Code `SessionStart` → `additionalContext`, Antigravity `PreInvocation` → `injectSteps[ephemeralMessage]` once per conversation (tracked in the session log), `revathi memory search` (BM25, stdlib). Installer registers both hooks; doctor checks them.
+- Shield: policy deny rules for `revathi memory approve|reject|forget` (any form, incl. `python -c "memory.approve(…)"`) and shell writes into `.revathi/memory`; guard denies Write/Edit inside the memory store. Agents may still propose, list, search, show and read.
+- Tests: 12 new (28 memory tests), full suite 100/100. Poisoning set (planted file, forged approval, injected text, secret, unsourced, edited-after-approval, self-approve) → nothing reaches the session ✅ (Phase 7 criterion, unit level).
+- ⚠️ Speed: `index_text` over 1,000 notes = ~82 ms on this Windows machine (target was <20 ms); mostly file opens. 💭 Fine for realistic sizes (tens to low hundreds of notes); backlog: a verified cache keyed by file size + mtime.
+- ❓ Antigravity: whether an `ephemeralMessage` stays visible after the first model call is unknown (docs call it "transient"). Live test decides between once per conversation and every call.
+- Not covered by the shield (honest): writes through other programs (e.g. a Python script that writes the files) and a custom `REVATHI_HOME` path in shell commands. Such files are still ignored, because they lack a matching approval in `log.md`.
 
 **Releases:** 7a–7c = v1.1 (safe memory) · 7d–7e = v1.2 (learns) · 7f–7h = v1.3 (expert + graph).
 **Cost (💭):** ≤ ~2,500 tokens injected per session; learning uses no model tokens.
