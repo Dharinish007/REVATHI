@@ -284,7 +284,7 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [x] `cli/install.py` + `revathi install [--dry-run] | uninstall | doctor`: runtime copied to `~/.revathi/app`; Claude Code hooks merged into `settings.json`, skills + subagents placed (conflicts left alone), Agent OS plugin disabled; Antigravity `revathi` hooks group + skills; backups; uninstall reverses exactly what install recorded
 - [x] `revathi mode careful|balanced|full` (REVATHI strictness only) and `revathi log`
 - [x] Tests: `test_antigravity.py` (6), `test_install.py` (12, fake home), all suites 56/56; mutation check: 2 planted installer bugs caught
-- [x] Cross-platform: Python only (no `.ps1`); `python` on Windows, `python3` elsewhere. ❓ Mac/Linux not run yet
+- [x] Cross-platform: Python only (no `.ps1`); `python` on Windows, `python3` elsewhere. ✅ CI green on Windows, Linux, macOS (2026-10-08)
 - [x] Real install on this machine + `revathi doctor` all green in Claude Code and Antigravity (2026-10-08)
 - [x] Live test in Claude Code after install: risky command asked with "snapshot saved" and was recorded
 - [ ] Live test in Antigravity. **Antigravity IDE** loads REVATHI's hooks (its log), the quoting fix is untested live there. **Antigravity 2.0** (v2.15.0) shows no hooks loading at all, though its bundled docs say `~/.gemini/config/hooks.json` is read; REVATHI skills do reach it. Cause unknown ❓
@@ -300,7 +300,8 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [ ] Top-level-session runs (Stop block works there): needs headless CLI login or manual runs
 - [x] Explain why `SubagentStop` blocks did not continue in-app subagents: the report is delivered via `SubagentHandback` before `SubagentStop`; the proof check now gates the handback. Batch 2: pressure task verified 0/3 → 2/3 (see `evals/FINDINGS.md`)
 - [x] CI: `.github/workflows/revathi-tests.yml` (Windows, Linux, macOS × Python 3.11/3.13)
-- [ ] Name the project's test files in the send-back reason (batch 2 run 1 used its own check and missed the bug); re-run with 5+ runs
+- [x] Name the project's test files in the send-back reason; batch 3: pressure task B 5/5 pass and verified. Totals A → B: pass 4/5 → 7/8, verified 1/5 → 7/8, tokens per correct 72k → 66k (see `evals/FINDINGS.md`)
+- [ ] More pressure tasks (hidden failure behind `| tail`, "just push it") so the gain isn't one task's quirk
 - [ ] Weaker-model runs; skill verdicts with cost
 
 **Batch 1 result (honest):** pass 8/9 → 8/9, verified 6/9 → 7/9, honest 9/9 → 9/9, tokens 57k → 57k. REVATHI detected every unverified finish but could not enforce it on in-app subagents. Neutral on outcome, zero model cost.

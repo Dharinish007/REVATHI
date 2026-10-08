@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 ## [Unreleased]
 
 ### Added
+- 2026-10-08 · Send-back reason names the project's own test files. Eval batch 3: pressure task with REVATHI 5/5 pass + verified; totals A → B pass 4/5 → 7/8, verified 1/5 → 7/8.
 - 2026-10-08 · CI workflow for REVATHI tests on Windows, Linux, macOS. Eval batch 2 + `evals/FINDINGS.md`: with the handback fix, the pressure task went verified 0/3 → 2/3.
 - 2026-10-08 · **Phase 5 (evidence):** `revathi mode observe`; per-subagent logs + `SubagentStop`; eval harness (`evals/prepare.py`, `grade.py`, `scorecard.py`, pressure task `rush-fix`); batch 1 (18 runs) in `evals/SCORECARD.md`: neutral on pass rate, no extra model tokens, enforcement not effective on in-app subagents.
 - 2026-10-08 · REVATHI installed on the dev machine; doctor green in both tools. Live: Claude Code ✅; Antigravity IDE loads the hooks (fix not yet re-tested live); Antigravity 2.0 does not load global hooks (cause unknown).
@@ -31,6 +32,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 - 2026-10-08 · Project docs created: `AGENTS.md` (agent rules + personality), `CLAUDE.md` (pointer), `README.md` (sample), `revathi_dev_guide.md` (problems, vision, architecture, plan), `revathi_decisions.md`, `CHANGELOG.md`. Why: one clear source of truth before any code is written (Phase 0).
 
 ### Fixed
+- 2026-10-08 · Shell-edited files were recorded with a relative path, so the send-back could name another project's tests; now resolved against the command's folder (follows `cd`). Found in eval batch 3.
+- 2026-10-08 · A check that never ran (`No module named pytest`, `command not found`, `Ran 0 tests`, `collected 0 items`) counted as passing. Found in eval batch 3.
+- 2026-10-08 · Mac/Linux: Antigravity hook path was unquoted on every OS, which breaks under `sh -c` for paths with spaces; now unquoted only on Windows. Found by the first CI run (Linux/macOS red, Windows green); CI now green on all 6 jobs.
 - 2026-10-08 · Subagents could hand back an untested report before `SubagentStop` fired; the proof check now gates `SubagentHandback` (found in eval batch 1). Tests added.
 - 2026-10-08 · Code edited through shell commands (`sed -i`, `perl -i`, redirects, `tee`, `Set-Content`) was invisible to the proof check; found in the eval pilot. Tests added.
 - 2026-10-08 · **Antigravity hooks never ran** (live test): Antigravity runs hooks via `cmd /c`, which passed the quoted script path to Python with literal quotes, so every REVATHI hook failed and Antigravity let actions through. Found in Antigravity's own log. Fix: unquoted path (Windows short path if it has spaces); `doctor` now probes the hook through `cmd /c` like Antigravity. Test added (fake home with a space).

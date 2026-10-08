@@ -5,6 +5,8 @@
   after(...)   record what ran or changed, and whether a check passed
   finish(...)  proof check; returns a "block" Decision once per code change, else None
 """
+import os
+
 from engine import canary, config, guard, log, proof, undo
 from engine import policy as policy_mod
 from engine.event import COMMAND, OTHER, WRITE, Decision
@@ -86,13 +88,16 @@ def before(session, cwd, event, tool_input):
     return decision
 
 
-def after(session, event, ok, output=""):
-    """Record an action after it ran (ok = the tool reported success)."""
+def after(session, event, ok, output="", cwd=""):
+    """Record an action after it ran (ok = the tool reported success; cwd = the agent's folder, if known)."""
     if event.kind == OTHER:
         return
     pol = policy_mod.load()
     if event.kind == COMMAND:  # code edited through the shell counts as a code edit (recorded before any check)
+        base = undo.target_dir(event.command, cwd) if cwd else ""  # follows a leading `cd <dir> &&`
         for path in proof.shell_edits(event.command, pol.proof):
+            if base and not os.path.isabs(path):
+                path = os.path.normpath(os.path.join(base, path))
             record(session, event.name, {"event": "post", "ok": True, "kind": WRITE, "path": path, "via": "command"})
     entry = {"event": "post", "ok": ok, **_summary(event, pol)}
     if event.kind == COMMAND and proof.is_check(event.command, pol.proof):

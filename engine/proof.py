@@ -57,6 +57,24 @@ def _code_edits(records, pol):
     return last_edit, changed
 
 
+TEST_NAME = re.compile(r"^(test_.+\.py|.+_test\.(py|go)|.+\.(test|spec)\.[cm]?[jt]sx?)$", re.I)
+
+
+def nearby_tests(paths, limit=4):
+    """Names of the project's own test files near the edited files (same folder, a tests/ folder, one level up)."""
+    found = []
+    for path in paths:
+        folder = os.path.dirname(os.path.abspath(path))
+        for base in (folder, os.path.dirname(folder)):
+            for where in (base, os.path.join(base, "tests"), os.path.join(base, "test")):
+                try:
+                    names = sorted(os.listdir(where))
+                except OSError:
+                    continue
+                found += [n for n in names if TEST_NAME.match(n) and n not in found]
+    return found[:limit]
+
+
 def already_sent_back(records, pol):
     """True if the agent was already sent back once since its last code change (block once, D15)."""
     records = _since_last_gap(records)
@@ -71,6 +89,8 @@ def check(records, pol):
     last_edit, changed = _code_edits(records, pol)
     if last_edit is None:
         return None  # no code changed: nothing to prove
+    edited_paths = [r["path"] for r in records[:last_edit + 1]
+                    if r.get("event") == "post" and r.get("kind") == "write" and r.get("path")]
     checks = [r for r in records[last_edit + 1:] if r.get("event") == "post" and r.get("check")]
     if any(r["check"] == "pass" for r in checks):
         return None
@@ -79,6 +99,11 @@ def check(records, pol):
     if checks:
         return Decision("block", f"the last check after your code change failed (`{checks[-1].get('command', '')}`). "
                                  "Fix it and run the check again, or tell the user plainly that it is failing.")
+    tests = nearby_tests(edited_paths)
+    if tests:  # point at the project's own tests: an invented one-off check can miss what they catch
+        return Decision("block", f"you changed code ({shown}) but no test has passed since. This project has its own "
+                                 f"tests ({', '.join(tests)}): run them, not just a one-off check. If they can't run, "
+                                 "tell the user that plainly instead of saying it works.")
     return Decision("block", f"you changed code ({shown}) but no test, build or lint check has passed since. "
                              "Run the project's checks now. If there is no way to check, tell the user that plainly "
                              "instead of saying it works.")

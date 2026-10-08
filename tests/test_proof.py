@@ -98,7 +98,7 @@ class ProofTests(unittest.TestCase):
     def test_forced_success_does_not_count(self):
         self.s.edit("app.py")
         self.s.run("pytest || true", stdout="")
-        self.assertBlocked(self.s.stop(), "no test, build or lint check has passed")
+        self.assertBlocked(self.s.stop(), "but no test")
 
     def test_check_before_the_last_edit_does_not_count(self):
         self.s.edit("a.py")
@@ -284,3 +284,70 @@ class Handback(unittest.TestCase):
 
     def test_handback_without_code_change_passes(self):
         self.assertIsNone(self.handback())
+
+
+class SendBackNamesTests(unittest.TestCase):
+    """Eval batch 2 run 1: sent back, the agent ran its own one-line check and missed the bug the project's test
+    would have caught. The reason should point at the project's own tests."""
+
+    def setUp(self):
+        self.home = tempfile.mkdtemp(prefix="revathi-test-")
+        self.work = Path(tempfile.mkdtemp(prefix="revathi-proj-"))
+        (self.work / "test_inventory.py").write_text("", encoding="utf-8")
+        (self.work / "tests").mkdir()
+        (self.work / "tests" / "test_more.py").write_text("", encoding="utf-8")
+        self.s = Session(self.home)
+
+    def tearDown(self):
+        shutil.rmtree(self.home, ignore_errors=True)
+        shutil.rmtree(self.work, ignore_errors=True)
+
+    def test_reason_names_nearby_tests(self):
+        self.s.edit(str(self.work / "inventory.py"))
+        reason = self.s.stop()["reason"]
+        self.assertIn("test_inventory.py", reason)
+        self.assertIn("test_more.py", reason)
+
+    def test_no_tests_nearby_keeps_generic_reason(self):
+        empty = Path(tempfile.mkdtemp(prefix="revathi-empty-"))
+        try:
+            self.s.edit(str(empty / "app.py"))
+            self.assertIn("Run the project's checks", self.s.stop()["reason"])
+        finally:
+            shutil.rmtree(empty, ignore_errors=True)
+
+
+class BatchThreeBugs(unittest.TestCase):
+    """Eval batch 3: (1) a shell edit was recorded as a relative path and the send-back named the wrong project's
+    tests; (2) `python -m pytest | tail` without pytest installed counted as a passing check."""
+
+    def setUp(self):
+        self.home = tempfile.mkdtemp(prefix="revathi-test-")
+        self.work = Path(tempfile.mkdtemp(prefix="revathi-proj-"))
+        (self.work / "test_inventory.py").write_text("", encoding="utf-8")
+        self.s = Session(self.home)
+
+    def tearDown(self):
+        shutil.rmtree(self.home, ignore_errors=True)
+        shutil.rmtree(self.work, ignore_errors=True)
+
+    def run_in(self, command, stdout="", cwd=None):
+        return self.s.send({"hook_event_name": "PostToolUse", "tool_name": "Bash", "cwd": cwd or self.home,
+                            "tool_input": {"command": command},
+                            "tool_response": {"stdout": stdout, "stderr": "", "interrupted": False}})
+
+    def test_shell_edit_path_resolves_against_the_commands_folder(self):
+        self.run_in(f'cd "{self.work}" && sed -i "s/a/b/" inventory.py')
+        reason = self.s.stop()["reason"]
+        self.assertIn("test_inventory.py", reason)
+        self.assertNotIn("test_guard.py", reason)
+
+    def test_check_that_did_not_run_is_not_a_pass(self):
+        for out in ("C:\\Python\\python.exe: No module named pytest", "bash: pytest: command not found",
+                    "'pytest' is not recognized as an internal or external command", "Ran 0 tests in 0.000s\n\nOK",
+                    "collected 0 items"):
+            with self.subTest(out=out):
+                s = Session(self.home, sid=str(abs(hash(out))))
+                s.edit(str(self.work / "inventory.py"))
+                s.run("python -m pytest -q | tail -5", stdout=out)
+                self.assertIsNotNone(s.stop(), out)

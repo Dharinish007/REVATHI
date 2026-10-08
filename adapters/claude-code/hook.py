@@ -75,7 +75,7 @@ def handle(raw):
     elif name in ("PostToolUse", "PostToolUseFailure"):
         response = raw.get("tool_response")
         output = response.get("stdout", "") if isinstance(response, dict) else str(response or "")
-        pipeline.after(session, event, ok=name == "PostToolUse", output=output)
+        pipeline.after(session, event, ok=name == "PostToolUse", output=output, cwd=str(raw.get("cwd", "")))
     return None
 
 

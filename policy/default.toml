@@ -165,6 +165,13 @@ failure_output = [
   '^FAILED\b',
   '^Traceback \(most recent call last\)',
   '^FAIL\b',
+  # The check never really ran (eval batch 3: `python -m pytest | tail` without pytest counted as a pass)
+  'No module named',
+  'command not found',
+  'is not recognized as an internal or external command',
+  '^Ran 0 tests',
+  'collected 0 items',
+  '(?i)no tests ran',
 ]
 code_extensions = [".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".go", ".rs", ".java", ".kt", ".kts",
                    ".c", ".h", ".cc", ".cpp", ".hpp", ".cs", ".rb", ".php", ".swift", ".scala", ".dart",

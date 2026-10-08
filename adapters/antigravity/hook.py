@@ -65,7 +65,7 @@ def handle(name, raw):
         verdict = "force_ask" if decision.verdict == "ask" else decision.verdict
         return {"decision": verdict, "reason": f"REVATHI guard: {decision.reason}"}
     if name == "PostToolUse":
-        pipeline.after(session, event, ok=not raw.get("error"), output=str(raw.get("error") or ""))
+        pipeline.after(session, event, ok=not raw.get("error"), output=str(raw.get("error") or ""), cwd=_cwd(raw))
     return {}
 
 
