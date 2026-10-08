@@ -5,7 +5,8 @@ Input (camelCase): conversationId, workspacePaths, toolCall {name, args}; PostTo
   PreToolUse  -> {"decision": "deny"|"force_ask", "reason": ...} or {}
   PostToolUse -> {}
   Stop        -> {"decision": "continue", "reason": ...} once per code change (sends the agent back), else {}
-  PreInvocation -> {"injectSteps": [{"ephemeralMessage": <approved memory>}]} once per conversation, else {}
+  PreInvocation -> {"injectSteps": [{"ephemeralMessage": <approved memory>}]} before every model call, else {}
+                   (live 2026-10-08: memory sent only once was not used, as the message is transient)
 Antigravity has no "already sent back" flag; the engine tracks that in the session log.
 Always exits 0. If anything here breaks, the agent carries on (the guard itself fails safe inside the pipeline).
 """
@@ -19,6 +20,7 @@ from engine import pipeline  # noqa: E402
 from engine.event import COMMAND, OTHER, WRITE, Event  # noqa: E402
 
 TOOL = "antigravity"
+RECALL_LIMIT = 3000  # characters (~750 tokens): re-sent on every model call, so smaller than the session-start index
 WRITE_TOOLS = ("write_to_file", "replace_file_content", "multi_replace_file_content")
 
 
@@ -53,8 +55,8 @@ def _cwd(raw):
 
 def handle(name, raw):
     session = str(raw.get("conversationId", ""))
-    if name == "PreInvocation":  # fires before every model call: inject memory once per conversation
-        text = pipeline.recall(session, TOOL, _cwd(raw), once=True)
+    if name == "PreInvocation":  # an ephemeralMessage lasts one model call, so memory is re-sent before each call
+        text = pipeline.recall(session, TOOL, _cwd(raw), limit=RECALL_LIMIT)
         return {"injectSteps": [{"ephemeralMessage": text}]} if text else {}
     if name == "Stop":
         decision = pipeline.finish(session)

@@ -106,16 +106,14 @@ def after(session, event, ok, output="", cwd=""):
     record(session, event.name, entry)
 
 
-def recall(session, name, cwd="", once=False):
-    """Approved memory to show at the start of a session, or None. once=True: at most once per session."""
+def recall(session, name, cwd="", limit=None):
+    """Approved memory to show the agent (text), or None. Recorded once per session, however often it is sent."""
     try:
-        if once and any(r.get("event") == "recall" for r in log.read(session)):
-            return None
-        text = memory.index_text(cwd, name)
+        text = memory.index_text(cwd, name, **({"limit": limit} if limit else {}))
+        if text and not any(r.get("event") == "recall" for r in log.read(session)):
+            record(session, name, {"event": "recall", "chars": len(text)})
     except Exception:
         return None  # memory is a help, not a safety check: if it breaks, the session starts without it
-    if text:
-        record(session, name, {"event": "recall", "chars": len(text)})
     return text or None
 
 

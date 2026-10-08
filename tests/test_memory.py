@@ -217,14 +217,15 @@ class Recall(Base):
         self.assertIsNone(run_hook("claude-code", "SessionStart", {"session_id": "s1",
                                                                    "hook_event_name": "SessionStart"}, self.home))
 
-    def test_antigravity_injects_once_per_conversation(self):
+    def test_antigravity_injects_before_every_model_call(self):
         self.approve_note(title="User likes tables", type="preference")
         raw = {"conversationId": "c1", "invocationNum": 0, "workspacePaths": [self.home]}
         first = run_hook("antigravity", "PreInvocation", raw, self.home)
         self.assertIn("User likes tables", first["injectSteps"][0]["ephemeralMessage"])
-        self.assertEqual(run_hook("antigravity", "PreInvocation", {**raw, "invocationNum": 1}, self.home), {})
-        other = run_hook("antigravity", "PreInvocation", {**raw, "conversationId": "c2"}, self.home)
-        self.assertIn("injectSteps", other)
+        again = run_hook("antigravity", "PreInvocation", {**raw, "invocationNum": 1}, self.home)
+        self.assertIn("User likes tables", again["injectSteps"][0]["ephemeralMessage"])
+        recalls = [r for r in memory.log.read("c1") if r.get("event") == "recall"]
+        self.assertEqual(len(recalls), 1)  # sent every call, recorded once
 
     def test_speed_with_1000_notes(self):
         folder = memory.root() / "user"

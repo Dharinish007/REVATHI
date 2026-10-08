@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 
 ## [Unreleased]
 
+### Fixed
+- 2026-10-08 · Antigravity did not use REVATHI memory (live test): its `ephemeralMessage` lasts one model call, and memory was sent only once. Now re-sent before every call, capped at 3,000 chars; recorded once per conversation. Claude Code recall confirmed live.
+
 ### Added
 - 2026-10-08 · **Phase 7b + 7c (recall + shield):** approved memory is shown at session start in Claude Code (`SessionStart`) and Antigravity (`PreInvocation`, once per conversation), framed as data, not commands; `revathi memory search`. The guard stops agents approving, rejecting, forgetting or editing memory (policy rules + memory-store write check). Installer and doctor cover the new hooks. 12 tests; 100/100 pass. Why: memory every tool can use, that an AI can't poison by approving itself.
 - 2026-10-08 · **Phase 7a (memory store):** `engine/memory.py` (OKF v0.2 notes with `x-revathi` keys, stdlib frontmatter parser, inbox → approve/reject/forget, archive instead of delete, hash-chained `log.md`) and `revathi memory propose|list|show|approve|reject|forget|check`. A note counts only if unchanged since the user approved it; secrets are refused. Tests `tests/test_memory.py` (16); 87/87 pass. Why: the safe base the second brain is built on.
