@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 
 ## [Unreleased]
 
+## [1.0.0rc1] - 2026-10-08 (prepared, not yet published)
+Everything below under "Unreleased" ships in this release candidate. Packaging: `pip install revathi` → `revathi` command; MIT license; standalone-repo CI with a wheel content check.
+
 ### Added
 - 2026-10-08 · **Phase 5 done.** Second pressure task `quick-rename` (ceiling effect: the model tested on its own); verdict per REVATHI part in `evals/FINDINGS.md`.
 - 2026-10-08 · Send-back reason names the project's own test files. Eval batch 3: pressure task with REVATHI 5/5 pass + verified; totals A → B pass 4/5 → 7/8, verified 1/5 → 7/8.

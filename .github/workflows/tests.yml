@@ -1,0 +1,37 @@
+name: tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python: ["3.11", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Unit and integration tests
+        run: python -m unittest discover -s tests -v
+      - name: Build the wheel and check its contents
+        shell: bash
+        run: |
+          python -m pip install -q build
+          python -m build --wheel --outdir dist .
+          python - <<'PY'
+          import glob, zipfile
+          names = zipfile.ZipFile(glob.glob("dist/*.whl")[0]).namelist()
+          need = ["revathi/adapters/claude-code/hook.py", "revathi/adapters/antigravity/hook.py",
+                  "revathi/engine/pipeline.py", "revathi/policy/default.toml", "revathi/cli/install.py",
+                  "revathi/core/AGENTS.md"]
+          missing = [n for n in need if n not in names]
+          skills = sum(n.endswith("SKILL.md") for n in names)
+          assert not missing, f"missing from wheel: {missing}"
+          assert skills >= 16, f"only {skills} skills in wheel"
+          assert not any(n.startswith(("revathi/tests", "revathi/evals")) for n in names), "tests/evals leaked"
+          print(f"wheel ok: {len(names)} files, {skills} skills")
+          PY

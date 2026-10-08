@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 6 (Launch) next: needs decisions (license, own repo)** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
+**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
 
 ---
 
@@ -229,7 +229,7 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 | 3 ↩️ Safety net ✅ | Survive mistakes | Undo snapshot/restore; canary traps | 5, 4 | Seeded destructive action restored by `revathi undo`; canary touch is flagged |
 | 4 ⌨️ Front desk 🔨 | One-command setup | CLI: install / doctor / mode / undo / log; Antigravity adapter; Windows + Mac/Linux | 13, 12 | Fresh machine → `revathi install` → `revathi doctor` all green in 2 tools |
 | 5 🧪 Proven ✅ | Evidence | All evals 3+ runs, baseline vs REVATHI; cost per correct result; CI | 2, 3, 9, 10 | Scorecard shows a verdict for every skill; neutral + costly skills cut |
-| 6 🚀 Launch | Public v1 | GitHub release, Claude Code plugin, PyPI; real README; license | – | A new user installs from a public channel and passes the quick start |
+| 6 🚀 Launch 🔨 | Public v1 | GitHub release, Claude Code plugin, PyPI; real README; license | – | A new user installs from a public channel and passes the quick start |
 | 7 🧠 Memory | Second brain | Memory store, index, search, approval, expiry | 7, 8 | Facts survive across sessions and 2 tools; a planted bad memory is rejected |
 | 8 🌍 Expand | Reach + scale | Codex, Cursor, Gemini, OpenCode adapters; starter packs; long-task evals; team mode | 11, 12, 14, 15 | Same skill passes the same eval in 3+ tools |
 
@@ -306,6 +306,15 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [ ] (backlog) Weaker-model and top-level-session runs; skill verdicts with cost; tasks from real failures
 
 **Batch 1 result (honest):** pass 8/9 → 8/9, verified 6/9 → 7/9, honest 9/9 → 9/9, tokens 57k → 57k. REVATHI detected every unverified finish but could not enforce it on in-app subagents. Neutral on outcome, zero model cost.
+
+### Phase 6 checklist
+- [x] MIT `LICENSE` (D25); real `README.md`; version 1.0.0rc1 (D28)
+- [x] `pyproject.toml`: `pip install revathi` gives the `revathi` command; wheel built and installed in a fresh environment; `revathi install` + `doctor` all green in a fake home with a space
+- [x] Standalone-repo CI (`.github/workflows/tests.yml`): tests on 3 OSes + wheel content check
+- [x] Local branch `revathi-standalone` (`git subtree split`, history kept) ready to push to a new repo (D26)
+- [ ] **User:** create the GitHub repo `Dharinish007/REVATHI` (or approve me pushing to it once created)
+- [ ] **User:** PyPI account + approve publishing `revathi` (name was free on 2026-10-08)
+- [ ] Live tests still pending: Antigravity IDE (A1–A3), Claude C2 (canary curl)
 
 ### Backlog (later, not now)
 Cross-model second opinion · hidden tests / mutation testing · thinker/doer split · MCP gateway · skill registry with evidence scores · "REVATHI-verified" badge · formal verification (research only).

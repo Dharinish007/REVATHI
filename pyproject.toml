@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "revathi"
+version = "1.0.0rc1"
+description = "The trust layer for AI agents: guard, proof before done, undo and a tamper-evident record for Claude Code and Antigravity."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+authors = [{ name = "Dharinish007" }]
+keywords = ["ai-agents", "claude-code", "antigravity", "hooks", "safety", "guardrails"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Topic :: Software Development :: Quality Assurance",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/Dharinish007/REVATHI"
+
+[project.scripts]
+revathi = "revathi.cli.revathi:main"
+
+# The whole REVATHI folder is the "revathi" package; hooks and the CLI find engine/ next to themselves.
+[tool.setuptools]
+package-dir = { "revathi" = "." }
+packages = ["revathi", "revathi.engine", "revathi.cli"]
+
+[tool.setuptools.package-data]
+revathi = ["adapters/*/*.py", "adapters/*/*.json", "adapters/*/*.md", "policy/*.toml",
+           "core/AGENTS.md", "core/agents/*.md", "core/skills/*/*", "core/skills/*/*/*"]

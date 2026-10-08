@@ -2,3 +2,6 @@
 .livetest/
 __pycache__/
 evals/runs/
+build/
+dist/
+*.egg-info/

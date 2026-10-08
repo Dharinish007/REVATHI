@@ -30,10 +30,12 @@ Agents may add *Proposed* entries. Only the user accepts them.
 | D22 | Install copies the runtime to `~/.revathi/app`; hooks call `python "<app>/adapters/<tool>/hook.py"` (`python3` on Mac/Linux) | Proposed | Works after the repo moves; same command form works in cmd, PowerShell and bash | 2026-10-08 |
 | D23 | "Block once per code change" is tracked in the session log by the engine, not by a tool flag | Proposed | Antigravity has no `stop_hook_active`; one rule for every tool | 2026-10-08 |
 | D24 | In Antigravity, REVATHI's *ask* is sent as **`force_ask`** | Accepted | Antigravity's `ask` respects "Always Allow" and passed silently with the user's allow-all setting (live 2026-10-08); REVATHI's asks must not depend on tool auto-approve. Fewer prompts = `revathi mode full` | 2026-10-08 |
+| D25 | License **MIT** | Accepted | Simplest, most permissive; maximum adoption | 2026-10-08 |
+| D26 | REVATHI moves to **its own repo** at launch (history kept via `git subtree split`) | Accepted | Clean history, own issues and CI | 2026-10-08 |
+| D27 | Launch channels: **GitHub release + PyPI** (`pip install revathi`); Claude Code plugin later | Accepted (user delegated the choice) | One installer covers every tool; easiest path for users; a Claude-only plugin adds a second install path to maintain | 2026-10-08 |
+| D28 | First release is **1.0.0rc1** (release candidate) | Proposed | Antigravity not yet live-confirmed; final 1.0.0 after the pending live tests | 2026-10-08 |
 
 ## Open questions (need the user)
 | ID | Question | Options |
 |---|---|---|
-| Q1 | License | MIT · Apache-2.0 · other |
-| Q2 | Move REVATHI to its own repo? When? | Before Phase 6 (launch) is suggested |
 | Q3 | Business model | Free core only · free core + paid team features later |
