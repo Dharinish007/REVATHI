@@ -5,6 +5,10 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 
 ## [Unreleased]
 
+### Added
+- 2026-10-08 · **Phase 7a (memory store):** `engine/memory.py` (OKF v0.2 notes with `x-revathi` keys, stdlib frontmatter parser, inbox → approve/reject/forget, archive instead of delete, hash-chained `log.md`) and `revathi memory propose|list|show|approve|reject|forget|check`. A note counts only if unchanged since the user approved it; secrets are refused. Tests `tests/test_memory.py` (16); 87/87 pass. Why: the safe base the second brain is built on.
+- 2026-10-08 · Guide: Phase 7 (second brain) plan with slices 7a–7h, built on research of memory frameworks, Karpathy's LLM wiki and Google's OKF format. Decisions D29–D36 proposed. Phase 6: GitHub repo marked live (CI green). Why: agree the full plan before writing memory code.
+
 ## [1.0.0rc1] - 2026-10-08 (prepared, not yet published)
 Moved to its own repo: https://github.com/Dharinish007/REVATHI (history kept).
 Everything below under "Unreleased" ships in this release candidate. Packaging: `pip install revathi` → `revathi` command; MIT license; standalone-repo CI with a wheel content check.

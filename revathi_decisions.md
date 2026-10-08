@@ -34,6 +34,14 @@ Agents may add *Proposed* entries. Only the user accepts them.
 | D26 | REVATHI moves to **its own repo** at launch (history kept via `git subtree split`) | Accepted | Clean history, own issues and CI | 2026-10-08 |
 | D27 | Launch channels: **GitHub release + PyPI** (`pip install revathi`); Claude Code plugin later | Accepted (user delegated the choice) | One installer covers every tool; easiest path for users; a Claude-only plugin adds a second install path to maintain | 2026-10-08 |
 | D28 | First release is **1.0.0rc1** (release candidate) | Proposed | Antigravity not yet live-confirmed; final 1.0.0 after the pending live tests | 2026-10-08 |
+| D29 | Memory notes use **OKF v0.2** (Apache-2.0, version pinned) + `x-revathi` keys; a missing `status` means **draft**, not stable | Proposed | Open, plain-file standard with source and review fields; OKF's "missing = stable" default would let unreviewed notes count as trusted | 2026-10-08 |
+| D30 | Memory lives in `~/.revathi/memory/` (user, project by id, tool); nothing written into user repos until team mode | Proposed | Keeps repos clean (as D14); one store shared by every tool | 2026-10-08 |
+| D31 | Recall = session-start injection (Claude Code `SessionStart`, Antigravity `PreInvocation`) of a capped index (<10,000 chars) + on-demand `revathi memory search`; rules files never edited | Proposed | Keeps D20; fits Claude Code's 10,000-char cap ✔️ | 2026-10-08 |
+| D32 | Learning runs **offline only** (session end or CLI); hooks never mine, merge or call an AI | Proposed | Hooks stay fast (<100 ms); learning costs no model tokens | 2026-10-08 |
+| D33 | Promotion ladder: episode → lesson (≥3 proof-passed episodes) → skill; each step needs user approval; notes expire after 6 months unless renewed | Proposed | Knowledge must be earned and proven (Voyager/ExpeL idea); stale notes fade | 2026-10-08 |
+| D34 | Frontmatter read with a small stdlib subset parser (flat keys, inline lists/maps); no PyYAML | Proposed | Keeps D7 (zero dependencies) | 2026-10-08 |
+| D35 | Recorder may store the user's prompts (redacted, **opt-in**) so corrections can be learned | Proposed (user choice) | Corrections are the richest learning signal; amends D14, so off by default | 2026-10-08 |
+| D36 | Memory graph = a self-contained local HTML viewer (`revathi memory graph`), no graph database | Proposed | Graph is derived from note links; zero dependencies, no network | 2026-10-08 |
 
 ## Open questions (need the user)
 | ID | Question | Options |

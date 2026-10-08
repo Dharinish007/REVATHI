@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete.
+**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a Store ✅ · next 7b Recall (plan in §8).**
 
 ---
 
@@ -312,9 +312,55 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [x] `pyproject.toml`: `pip install revathi` gives the `revathi` command; wheel built and installed in a fresh environment; `revathi install` + `doctor` all green in a fake home with a space
 - [x] Standalone-repo CI (`.github/workflows/tests.yml`): tests on 3 OSes + wheel content check
 - [x] Local branch `revathi-standalone` (`git subtree split`, history kept) ready to push to a new repo (D26)
-- [ ] **User:** create the GitHub repo `Dharinish007/REVATHI` (or approve me pushing to it once created)
+- [x] GitHub repo `Dharinish007/REVATHI` live; CI green on `e20a6d1` (2026-10-08)
 - [ ] **User:** PyPI account + approve publishing `revathi` (name was free on 2026-10-08)
 - [ ] Live tests still pending: Antigravity IDE (A1–A3), Claude C2 (canary curl)
+
+### Phase 7 plan: 🧠 Second brain (💭 planned 2026-10-08; decisions D29–D36 Proposed)
+**Goal:** the agent remembers facts, preferences, past fixes and learned procedures across sessions and tools, learns from repeated proven work, and never keeps anything the user didn't approve.
+**Basis:** research of memory frameworks (mem0, Letta, Zep/Graphiti, LangMem, Basic Memory, Claude Code auto memory, Voyager, ExpeL, ACE) + Karpathy's LLM-wiki pattern. Note format = Google's **OKF v0.2** (Apache-2.0 ✔️) + REVATHI keys.
+
+**Verified facts it rests on (2026-10-08):** Claude Code `SessionStart` can inject `additionalContext`, capped at 10,000 chars ✔️ · Antigravity has no SessionStart; `PreInvocation` can return `injectSteps` with `ephemeralMessage` ✔️ (docs; not live-tested ❓) · Claude Code auto memory loads first 200 lines / 25 KB of `MEMORY.md`, per repo, machine-local ✔️.
+
+**Store layout** (`~/.revathi/memory/`, D30)
+| Path | Holds |
+|---|---|
+| `index.md` | Short catalog of approved notes; the only thing injected (<10,000 chars) |
+| `log.md` | Hash-chained record of every approval, change, archive |
+| `user/` · `projects/<id>/` · `tools/<name>/` | Approved notes by scope (`id` = hash of repo root) |
+| `episodes/` | Proof-passed work summaries; evidence only, never injected |
+| `skills/<name>/SKILL.md` | Promoted procedures; installer copies them to each tool |
+| `inbox/` · `archive/` | Waiting for the user · retired notes (never hard-deleted) |
+| `index.json` | Search index; disposable, rebuilt from the files |
+
+**Memory types**
+| Type | Example | Risk | Injected? | Who approves |
+|---|---|---|---|---|
+| episode | "fixed CRLF bug, tests passed" | low | no (evidence) | recorded automatically |
+| preference | "short answers, tables" | low | yes | user (batch) |
+| fact | "project uses pytest" | medium | yes | user |
+| lesson | "on Windows check line endings first" | medium/high | yes | user, after ≥3 episodes |
+| skill | "release steps for this repo" | high | yes (procedure) | user, after proof-passed runs + diff |
+
+**Learning loop:** hook (fast: recall + log) → offline (notice → check → inbox → consolidate → forget) → user (review). Hooks never mine, merge or call an AI (D32).
+
+**Slices**
+| Slice | Builds | Main files | Done when |
+|---|---|---|---|
+| 7a 🗄️ Store | Frontmatter subset parser, validator (missing status = draft, sources required), add/list/show/approve/reject/forget, hash-chained `log.md`, CLI `revathi memory …` | `engine/memory.py`, `cli/revathi.py`, `tests/test_memory.py` | Round-trip + validation + tamper tests pass |
+| 7b 📇 Recall | `index.md` builder (capped), Claude Code `SessionStart`, Antigravity `PreInvocation` injection, BM25 `search`, installer registers hooks | `engine/memory.py`, `engine/search.py`, adapters, `cli/install.py` | Fact approved in Claude Code appears in Antigravity (live); hook adds <20 ms p95 over 1,000 notes |
+| 7c 🛡️ Shield | Guard rules: agent can't approve or write the store; secret scan on proposals; taint (web/tool-sourced); "data, not commands" framing | `policy/default.toml`, `engine/guard.py`, `engine/memory.py` | Poisoning test set: 0 bad memories reach the index → **Phase 7 criterion "planted bad memory rejected"** |
+| 7d 👀 Notice + review | `revathi memory propose`, offline miner over session logs (repeats, fail→pass fixes, corrections if D35), batch `review` | `engine/learn.py`, CLI | Fixture logs give expected proposals; precision reported; 10 items reviewed <2 min |
+| 7e 🧹 Tidy | Votes, delta merge (no rewrites), contradiction → `invalid_at`, stale → archive | `engine/learn.py` | Fixture tests: duplicates merged with sources kept, nothing hard-deleted |
+| 7f 🎓 Expert + proof | Promotion ladder episode → lesson → skill; eval memory on vs off on repeat tasks | `engine/learn.py`, `evals/` | Scorecard verdict (pass rate, tokens per correct). Only then market memory as flagship |
+| 7g 📥 Import | `revathi memory import --from claude` → inbox | CLI | Fixture auto-memory lands as proposed, nothing auto-approved |
+| 7h 🕸️ Graph view | `revathi memory graph` → one self-contained local HTML (no network): map, type colors, filter, note details, evidence trace, risk/contradiction/orphan/stale views | `cli/graph.py` | Renders a 500-note fixture; works offline; tests on graph data |
+
+**7a status ✅ (2026-10-08):** `engine/memory.py` + `revathi memory propose|list|show|approve|reject|forget|check`; `tests/test_memory.py` 16 tests, full suite 87/87. A note is trusted only if its file matches the hash recorded at approval, so hand-written, forged or later-edited notes are ignored (mutation check: removing that rule fails 2 tests). Secret scan moved forward from 7c (otherwise a key could reach disk). ⚠️ Until 7c, an agent could still run `revathi memory approve` itself; nothing reads memory into sessions yet (7b), so there is no exposure today.
+
+**Releases:** 7a–7c = v1.1 (safe memory) · 7d–7e = v1.2 (learns) · 7f–7h = v1.3 (expert + graph).
+**Cost (💭):** ≤ ~2,500 tokens injected per session; learning uses no model tokens.
+**Limits (honest):** memory informs, it doesn't make the model smarter · a bad note the user approves gets in · Antigravity injection untested live · OKF is v0.x (version pinned).
 
 ### Backlog (later, not now)
 Cross-model second opinion · hidden tests / mutation testing · thinker/doer split · MCP gateway · skill registry with evidence scores · "REVATHI-verified" badge · formal verification (research only).
