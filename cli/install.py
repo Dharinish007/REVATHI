@@ -105,6 +105,8 @@ def _read_json(path):
 def _write_json(path, data, report, backup_dir):
     if report.dry:
         return
+    if path.exists() and _read_json(path) == data:
+        return  # unchanged: rewriting would make the AI tool reload its hooks mid-command (and drop that event)
     if path.exists():
         backup_dir.mkdir(parents=True, exist_ok=True)
         shutil.copy2(path, backup_dir / path.name)

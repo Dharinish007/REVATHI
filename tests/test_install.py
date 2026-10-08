@@ -205,3 +205,28 @@ class Modes(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class Reinstall(unittest.TestCase):
+    """Live 2026-10-08: commands that ran `revathi install` left no PostToolUse record. A rewrite of an unchanged
+    settings.json makes Claude Code reload hooks mid-command; reinstalling must not touch unchanged files."""
+
+    def setUp(self):
+        self.home = Path(tempfile.mkdtemp(prefix="revathi-reinstall-"))
+        (self.home / ".claude").mkdir()
+        self.env = {**os.environ, "HOME": str(self.home), "USERPROFILE": str(self.home),
+                    "REVATHI_HOME": str(self.home / ".revathi"), "REVATHI_NO_CLAUDE_CLI": "1"}
+        self.env.pop("CLAUDE_CONFIG_DIR", None)
+
+    def tearDown(self):
+        shutil.rmtree(self.home, ignore_errors=True)
+
+    def test_second_install_leaves_settings_untouched(self):
+        cli = [sys.executable, str(CLI), "install"]
+        subprocess.run(cli, capture_output=True, text=True, env=self.env, check=True)
+        settings = self.home / ".claude" / "settings.json"
+        before = settings.stat().st_mtime_ns
+        backups = len(list((self.home / ".revathi" / "backups").rglob("*.json")))
+        subprocess.run(cli, capture_output=True, text=True, env=self.env, check=True)
+        self.assertEqual(settings.stat().st_mtime_ns, before)
+        self.assertEqual(len(list((self.home / ".revathi" / "backups").rglob("*.json"))), backups)
