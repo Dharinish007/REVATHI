@@ -25,7 +25,7 @@ from engine import config, log  # noqa: E402
 RUNTIME = ("engine", "adapters", "policy", "core", "cli")
 AGENT_OS_PLUGIN = "agent-os@skills-dir"
 CLAUDE_EVENTS = {
-    "PreToolUse": "Bash|PowerShell|Write|Edit|MultiEdit|Read|Grep|WebFetch|WebSearch|mcp__.*",
+    "PreToolUse": "Bash|PowerShell|Write|Edit|MultiEdit|Read|Grep|WebFetch|WebSearch|SubagentHandback|mcp__.*",
     "PostToolUse": "Bash|PowerShell|Write|Edit|MultiEdit",
     "PostToolUseFailure": "Bash|PowerShell|Write|Edit|MultiEdit",
     "Stop": None,

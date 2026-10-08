@@ -3,6 +3,7 @@
   PreToolUse                      -> pipeline.before: ask / deny / no output
   PostToolUse, PostToolUseFailure -> pipeline.after
   Stop, SubagentStop              -> pipeline.finish: {"decision": "block"} once per code change
+SubagentHandback (PreToolUse) -> pipeline.finish too: a subagent delivers its report before it stops.
 A subagent's events carry agent_id; they get their own log (<session>.<agent_id>), so its proof check judges
 only its own work and the parent's log stays clean.
 
@@ -56,6 +57,14 @@ def handle(raw):
         decision = pipeline.finish(session, sent_back=bool(raw.get("stop_hook_active")))
         if decision:
             return {"decision": "block", "reason": f"REVATHI proof check: {decision.reason}"}
+        return None
+    if name == "PreToolUse" and raw.get("tool_name") == "SubagentHandback":
+        # A subagent hands its report back *before* SubagentStop fires, so the proof check gates the handback:
+        # refusing it keeps the subagent working with the reason as feedback (once per code change).
+        decision = pipeline.finish(session)
+        if decision:
+            return {"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": "deny",
+                                           "permissionDecisionReason": f"REVATHI proof check: {decision.reason}"}}
         return None
     event = to_event(raw)
     if name == "PreToolUse":

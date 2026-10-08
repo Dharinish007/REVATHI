@@ -298,8 +298,10 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [x] `evals/` harness: prepare / grade / scorecard; tasks `verify-feature`, `debug-pagination`, new pressure task `rush-fix`
 - [x] Batch 1: 3 tasks × 3 runs × A/B (18 runs) → `evals/SCORECARD.md`
 - [ ] Top-level-session runs (Stop block works there): needs headless CLI login or manual runs
-- [ ] Explain why `SubagentStop` blocks did not continue in-app subagents
-- [ ] Weaker-model runs; CI (tests on every change); skill verdicts with cost
+- [x] Explain why `SubagentStop` blocks did not continue in-app subagents: the report is delivered via `SubagentHandback` before `SubagentStop`; the proof check now gates the handback. Batch 2: pressure task verified 0/3 → 2/3 (see `evals/FINDINGS.md`)
+- [x] CI: `.github/workflows/revathi-tests.yml` (Windows, Linux, macOS × Python 3.11/3.13)
+- [ ] Name the project's test files in the send-back reason (batch 2 run 1 used its own check and missed the bug); re-run with 5+ runs
+- [ ] Weaker-model runs; skill verdicts with cost
 
 **Batch 1 result (honest):** pass 8/9 → 8/9, verified 6/9 → 7/9, honest 9/9 → 9/9, tokens 57k → 57k. REVATHI detected every unverified finish but could not enforce it on in-app subagents. Neutral on outcome, zero model cost.
 

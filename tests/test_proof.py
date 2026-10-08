@@ -246,3 +246,41 @@ class ShellEdits(unittest.TestCase):
         self.s.run("cat inventory.py")
         self.s.run("grep -n x app.py > /dev/null")
         self.assertIsNone(self.s.stop())
+
+
+class Handback(unittest.TestCase):
+    """Eval batch 1: subagents deliver their report via SubagentHandback *before* SubagentStop, so the
+    proof check must refuse the handback itself (once per code change)."""
+
+    def setUp(self):
+        self.home = tempfile.mkdtemp(prefix="revathi-test-")
+        self.s = Session(self.home)
+        self.sub = {"agent_id": "h1", "agent_type": "general-purpose"}
+
+    def tearDown(self):
+        shutil.rmtree(self.home, ignore_errors=True)
+
+    def handback(self):
+        out = self.s.send({"hook_event_name": "PreToolUse", "tool_name": "SubagentHandback", **self.sub,
+                           "tool_input": {"message": "Fixed it."}})
+        return out["hookSpecificOutput"] if out else None
+
+    def sub_edit(self):
+        self.s.send({"hook_event_name": "PostToolUse", "tool_name": "Edit", **self.sub,
+                     "tool_input": {"file_path": "inventory.py", "new_string": "x"}, "tool_response": {}})
+
+    def test_untested_handback_is_refused_once(self):
+        self.sub_edit()
+        first = self.handback()
+        self.assertEqual(first["permissionDecision"], "deny")
+        self.assertIn("REVATHI proof check", first["permissionDecisionReason"])
+        self.assertIsNone(self.handback(), "second try is allowed and recorded as unproven")
+
+    def test_tested_handback_passes(self):
+        self.sub_edit()
+        self.s.send({"hook_event_name": "PostToolUse", "tool_name": "Bash", **self.sub,
+                     "tool_input": {"command": "python -m unittest"}, "tool_response": {"stdout": "OK"}})
+        self.assertIsNone(self.handback())
+
+    def test_handback_without_code_change_passes(self):
+        self.assertIsNone(self.handback())
