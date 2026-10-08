@@ -37,6 +37,7 @@ Everything below under "Unreleased" ships in this release candidate. Packaging: 
 - 2026-10-08 · Project docs created: `AGENTS.md` (agent rules + personality), `CLAUDE.md` (pointer), `README.md` (sample), `revathi_dev_guide.md` (problems, vision, architecture, plan), `revathi_decisions.md`, `CHANGELOG.md`. Why: one clear source of truth before any code is written (Phase 0).
 
 ### Fixed
+- 2026-10-08 · Installing from a Windows git clone (CRLF) reported every already-installed skill (LF) as a conflict, and uninstall could not clean them up; files are now compared ignoring line endings. `.gitattributes` added. Found when reinstalling from the new repo. Test added.
 - 2026-10-08 · Shell-edited files were recorded with a relative path, so the send-back could name another project's tests; now resolved against the command's folder (follows `cd`). Found in eval batch 3.
 - 2026-10-08 · A check that never ran (`No module named pytest`, `command not found`, `Ran 0 tests`, `collected 0 items`) counted as passing. Found in eval batch 3.
 - 2026-10-08 · Mac/Linux: Antigravity hook path was unquoted on every OS, which breaks under `sh -c` for paths with spaces; now unquoted only on Windows. Found by the first CI run (Linux/macOS red, Windows green); CI now green on all 6 jobs.

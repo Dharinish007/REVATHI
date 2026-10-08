@@ -75,6 +75,18 @@ class InstallFlow(unittest.TestCase):
         self.assertTrue((self.ag / "skills" / "debugging" / "SKILL.md").exists())
         self.assertTrue(any((self.home / ".revathi" / "backups").rglob("settings.json")))
 
+    def test_same_skill_with_other_line_endings_is_not_a_conflict(self):
+        # live 2026-10-08: a fresh git clone (CRLF) reported every installed skill (LF) as a conflict
+        src = ROOT / "core" / "skills" / "planning" / "SKILL.md"
+        dest = self.claude / "skills" / "planning"
+        dest.mkdir(parents=True)
+        original = src.read_bytes()
+        lf = original.replace(b"\r\n", b"\n")
+        flipped = lf if b"\r\n" in original else lf.replace(b"\n", b"\r\n")  # the other line ending style
+        (dest / "SKILL.md").write_bytes(flipped)
+        out = self.revathi("install")
+        self.assertIn("skill planning: already there (same)", out)
+
     def test_install_twice_does_not_duplicate(self):
         self.revathi("install")
         self.revathi("install")

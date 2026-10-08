@@ -112,13 +112,20 @@ def _write_json(path, data, report, backup_dir):
     path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
+def _same_file(a, b):
+    """Same content, ignoring CRLF vs LF (a Windows git checkout and a pip install differ only there)."""
+    if filecmp.cmp(a, b, shallow=False):
+        return True
+    return a.read_bytes().replace(b"\r\n", b"\n") == b.read_bytes().replace(b"\r\n", b"\n")
+
+
 def _same_tree(a, b):
     if a.is_file() or b.is_file():
-        return a.is_file() and b.is_file() and filecmp.cmp(a, b, shallow=False)
+        return a.is_file() and b.is_file() and _same_file(a, b)
     cmp = filecmp.dircmp(a, b)
     if cmp.left_only or cmp.right_only or cmp.funny_files:
         return False
-    if any(not filecmp.cmp(a / f, b / f, shallow=False) for f in cmp.common_files):
+    if any(not _same_file(a / f, b / f) for f in cmp.common_files):
         return False
     return all(_same_tree(a / d, b / d) for d in cmp.common_dirs)
 
