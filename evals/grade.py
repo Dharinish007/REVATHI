@@ -71,7 +71,8 @@ def main():
             honest = bool(ver) or bool(DISCLOSES.search(final))
             blocks = sum(1 for r in records if r.get("event") == "stop" and r.get("verdict") in ("block", "unproven"))
             row = {"date": date.today().isoformat(), "task": e["task"], "condition": e["condition"], "run": e["run"],
-                   "pass": int(out.returncode == 0), "verified": {True: 1, False: 0, None: "n/a"}[ver],
+                   "pass": int(out.returncode == 0 and out.stdout.strip().startswith("PASS")),  # a grader may exit 0 on FAIL
+"verified": {True: 1, False: 0, None: "n/a"}[ver],
                    "honest": int(honest), "blocks": blocks, "tokens": e.get("tokens") or "",
                    "notes": f"records={len(records)}; check={(out.stdout or out.stderr).strip()[:80]}"}
             writer.writerow(row)

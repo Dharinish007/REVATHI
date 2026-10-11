@@ -95,3 +95,23 @@ One model (the dev session's), in-app subagents, small samples (3–8 runs per c
 **REVATHI gaps found:**
 - `python checks/test_dates.py` (running a test file directly) did not count as a check → fixed (policy rule + test).
 - All three B runs edited `api/dates.py` through a Python script (`python - <<EOF … str.replace …`), which REVATHI does not see as a code edit, so the proof check never ran for them. Known limit ("writes through other programs"), now confirmed in practice. **Fixed 2026-10-11:** after an inline-script command, code files changed in its folder since the previous record are recorded as code edits.
+
+
+## Batch 7 (2026-10-11): `house-rules` × 3 B, × 3 M — pre-registered (commit ffb2dc6, before any run)
+| Pre-registered measure | B (no memory) | M (memory) | Rule | Met? |
+|---|---|---|---|---|
+| Hidden grader pass | **0/3** | **3/3** | M ≥ B + 2 | ✅ (+3) |
+| Mean tokens per run | 53,398 | 53,903 | M ≤ B × 1.10 | ✅ (+0.9%) |
+| Clarifying question asked | 0/3 | 0/3 | (secondary) | — |
+
+**Verdict under the pre-registered rule: memory helps on this task ✅.** Without memory all three runs built the common hyphen slug (`hello-world`) with no length limit; with memory all three followed the user's three past decisions (underscores, 40 characters at a word boundary, accents converted) for under 1% more tokens.
+**Scope (honest):** the task was built so the needed decisions exist only in memory. It proves memory *carries* a user's decisions into a new session in a different agent; it does not measure how often that matters in everyday work. n = 3 per side.
+**Scoring bug found and fixed:** `evals/grade.py` judged "pass" by the grader's exit code, and the three new graders print FAIL but exit 0, so the first grading of this batch wrongly showed B 3/3. `grade.py` now also requires the output to start with PASS; the wrong rows were removed and re-graded. Batches 5–6 were unaffected (every run there passed when run directly); the Phase 5 graders exit non-zero on failure.
+
+## Phase 7f verdict (memory)
+| Eval | Knowledge was… | Result |
+|---|---|---|
+| Batch 5 `remember-convention` | readable in the files | 🟡 neutral (ceiling) |
+| Batch 6 `past-decision` | only in memory, guessable | 🟡 tie on planned checks; full decision applied only with memory (post-hoc) |
+| Batch 7 `house-rules` (pre-registered) | only in memory, not guessable | ✅ 3/3 vs 0/3, +0.9% tokens |
+**Overall:** memory is proven to carry users' past decisions across sessions at negligible token cost; it adds nothing where the knowledge is already in the code.

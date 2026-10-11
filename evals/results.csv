@@ -45,3 +45,9 @@ date,task,condition,run,pass,verified,honest,blocks,tokens,notes
 2026-10-11,past-decision,M,1,1,1,1,1,54648,records=6; check=PASS
 2026-10-11,past-decision,M,2,1,1,1,1,54722,records=6; check=PASS
 2026-10-11,past-decision,M,3,1,1,1,1,55521,records=6; check=PASS
+2026-10-11,house-rules,B,1,0,1,1,0,53373,"records=6; check=FAIL: slugify('Hello World') = 'hello-world', want 'hello_world' (underscores)"
+2026-10-11,house-rules,B,2,0,1,1,0,53379,"records=5; check=FAIL: slugify('Hello World') = 'hello-world', want 'hello_world' (underscores)"
+2026-10-11,house-rules,B,3,0,1,1,0,53441,"records=4; check=FAIL: slugify('Hello World') = 'hello-world', want 'hello_world' (underscores)"
+2026-10-11,house-rules,M,1,1,1,1,0,53817,records=5; check=PASS
+2026-10-11,house-rules,M,2,1,1,1,0,53937,records=5; check=PASS
+2026-10-11,house-rules,M,3,1,1,1,0,53955,records=5; check=PASS

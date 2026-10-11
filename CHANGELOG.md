@@ -6,12 +6,14 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 ## [Unreleased]
 
 ### Fixed
+- 2026-10-11 · `evals/grade.py` counted a run as passing when the grader exited 0, even if it printed FAIL (first grading of batch 7 showed B 3/3 instead of 0/3). It now also requires the output to start with PASS; rows re-graded.
 - 2026-10-11 · Code edited through an inline script (`python - <<EOF`, `python -c`, `node -e`, heredocs) was invisible to the proof check (eval batch 6: 3/3 runs). After such a command, code files changed in its folder since the previous record now count as code edits (policy `script_commands`; scan skips dependency folders, stops at 5,000 files or 150 ms: 3 ms on this repo, 92 ms on a whole Desktop). 3 tests.
 - 2026-10-11 · Running a test file directly (`python checks/test_dates.py`) did not count as a check (memory eval batch 6). Now recognised; test added.
 - 2026-10-11 · A project's own test script (`python run_checks.py`, `./run_tests.sh`, `bash scripts/test.sh`) did not count as a check, so honest agents were sent back and recorded as unproven (found by the memory eval: 6/6 runs). Now recognised (policy rule); regression test; the 6 real logs replay as verified.
 - 2026-10-08 · Antigravity did not use REVATHI memory (live test): its `ephemeralMessage` lasts one model call, and memory was sent only once. Now re-sent before every call, capped at 3,000 chars; recorded once per conversation. Claude Code recall confirmed live.
 
 ### Added
+- 2026-10-11 · **Pre-registered memory eval (batch 7, `house-rules`):** without memory 0/3, with memory 3/3, +0.9% tokens; meets the success rule committed before the runs. Phase 7f verdict: memory proven to carry users' past decisions across sessions; neutral where the knowledge is already in the code.
 - 2026-10-11 · **Phase 7h (graph):** `revathi memory graph` writes one local, offline HTML map of memory (types, places, evidence, conflicts, untrusted and expiring notes; search, views, details with evidence trace). Note text can never run as HTML. 5 tests; 136/136 pass.
 - 2026-10-11 · **Phase 7g (import):** `revathi memory import --from claude [--project <folder>]` suggests Claude Code's own auto-memory notes for review (reader in the Claude adapter; nothing auto-approved; re-import skips known, catches edits; secrets refused). 5 tests; 128/128 pass.
 - 2026-10-11 · Memory eval batch 6 (`past-decision`): planned checks tied; with memory the user's past decision was applied in full and no question was asked (post-hoc measure, so promising, not proven). Edits made through Python scripts are invisible to the proof check (confirmed, backlog).
