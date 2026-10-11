@@ -6,6 +6,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 ## [Unreleased]
 
 ### Fixed
+- 2026-10-11 · Code edited through an inline script (`python - <<EOF`, `python -c`, `node -e`, heredocs) was invisible to the proof check (eval batch 6: 3/3 runs). After such a command, code files changed in its folder since the previous record now count as code edits (policy `script_commands`; scan skips dependency folders, stops at 5,000 files or 150 ms: 3 ms on this repo, 92 ms on a whole Desktop). 3 tests.
 - 2026-10-11 · Running a test file directly (`python checks/test_dates.py`) did not count as a check (memory eval batch 6). Now recognised; test added.
 - 2026-10-11 · A project's own test script (`python run_checks.py`, `./run_tests.sh`, `bash scripts/test.sh`) did not count as a check, so honest agents were sent back and recorded as unproven (found by the memory eval: 6/6 runs). Now recognised (policy rule); regression test; the 6 real logs replay as verified.
 - 2026-10-08 · Antigravity did not use REVATHI memory (live test): its `ephemeralMessage` lasts one model call, and memory was sent only once. Now re-sent before every call, capped at 3,000 chars; recorded once per conversation. Claude Code recall confirmed live.

@@ -94,4 +94,4 @@ One model (the dev session's), in-app subagents, small samples (3–8 runs per c
 
 **REVATHI gaps found:**
 - `python checks/test_dates.py` (running a test file directly) did not count as a check → fixed (policy rule + test).
-- All three B runs edited `api/dates.py` through a Python script (`python - <<EOF … str.replace …`), which REVATHI does not see as a code edit, so the proof check never ran for them. Known limit ("writes through other programs"), now confirmed in practice. Backlog: detect code-file changes by comparing file times/hashes at stop, not only by watching edit tools and shell redirects.
+- All three B runs edited `api/dates.py` through a Python script (`python - <<EOF … str.replace …`), which REVATHI does not see as a code edit, so the proof check never ran for them. Known limit ("writes through other programs"), now confirmed in practice. **Fixed 2026-10-11:** after an inline-script command, code files changed in its folder since the previous record are recorded as code edits.

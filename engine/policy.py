@@ -24,6 +24,7 @@ class ProofPolicy:
     not_counted: list       # [compiled pattern]: commands that hide failures, never count
     failure_output: list    # [compiled pattern]: output that means the check failed
     code_extensions: tuple  # edits to these files need a passing check
+    script_commands: list = None  # [compiled pattern]: inline scripts that may write files unseen (python -c, heredoc)
 
 
 @dataclass
@@ -56,6 +57,7 @@ def load(path=DEFAULT):
             not_counted=compile_all(proof["not_counted"], re.I),
             failure_output=compile_all(proof["failure_output"], re.M),
             code_extensions=tuple(e.lower() for e in proof["code_extensions"]),
+            script_commands=compile_all(proof.get("script_commands", []), re.I),
         ),
         careful_ask=[(re.compile(r["pattern"], re.I), r["reason"])
                      for r in data.get("modes", {}).get("careful", {}).get("extra_ask", [])],

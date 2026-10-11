@@ -1,6 +1,7 @@
 """Proof: the agent may not finish a turn in which it changed code until a check has passed after the last change."""
 import os
 import re
+import time
 
 from engine.event import Decision
 
@@ -22,6 +23,38 @@ def shell_edits(command, pol):
         if is_code(p, pol) and p not in seen:
             seen.append(p)
     return seen
+
+
+SKIP_DIRS = {".git", "node_modules", ".venv", "venv", "env", "__pycache__", "dist", "build", ".tox", ".mypy_cache",
+             ".pytest_cache", "target", ".next", ".idea", ".vscode"}
+SCAN_LIMIT = 5000  # files; keeps the hook fast in big repos (a larger repo is scanned only partly)
+SCAN_SECONDS = 0.15  # time budget: hooks must stay well under a second
+
+
+def runs_script(command, pol):
+    """True if the command runs an inline script that could write files unseen (python -c, heredoc, node -e)."""
+    return any(p.search(command) for p in (pol.script_commands or []))
+
+
+def changed_code_files(base, since, pol):
+    """Code files under base modified at or after `since` (epoch seconds), skipping dependency/build folders."""
+    found, seen, deadline = [], 0, time.monotonic() + SCAN_SECONDS
+    for folder, dirs, files in os.walk(base):
+        dirs[:] = [d for d in dirs if d not in SKIP_DIRS]
+        if time.monotonic() > deadline:
+            return found
+        for name in files:
+            seen += 1
+            if seen > SCAN_LIMIT:
+                return found
+            if is_code(name, pol):
+                path = os.path.join(folder, name)
+                try:
+                    if os.path.getmtime(path) >= since:
+                        found.append(path)
+                except OSError:
+                    continue
+    return found
 
 
 def is_check(command, pol):

@@ -7,6 +7,8 @@
   recall(...)  approved memory for the start of a session (text), else None
 """
 import os
+import time
+from datetime import datetime
 
 from engine import canary, config, guard, log, memory, proof, undo
 from engine import policy as policy_mod
@@ -89,6 +91,17 @@ def before(session, cwd, event, tool_input):
     return decision
 
 
+def _script_edits(session, base, pol):
+    """Code files an inline script changed: modified since the previous record in this session (eval batch 6)."""
+    try:
+        records = log.read(session)
+        last = records[-1].get("ts") if records else None
+        since = datetime.fromisoformat(last).timestamp() if last else time.time() - 60
+        return proof.changed_code_files(base, since, pol.proof)
+    except Exception:
+        return []  # a failed scan must never break the agent's work; the proof check simply sees less
+
+
 def after(session, event, ok, output="", cwd=""):
     """Record an action after it ran (ok = the tool reported success; cwd = the agent's folder, if known)."""
     if event.kind == OTHER:
@@ -100,6 +113,9 @@ def after(session, event, ok, output="", cwd=""):
             if base and not os.path.isabs(path):
                 path = os.path.normpath(os.path.join(base, path))
             record(session, event.name, {"event": "post", "ok": True, "kind": WRITE, "path": path, "via": "command"})
+        if base and proof.runs_script(event.command, pol.proof):
+            for path in _script_edits(session, base, pol):
+                record(session, event.name, {"event": "post", "ok": True, "kind": WRITE, "path": path, "via": "script"})
     entry = {"event": "post", "ok": ok, **_summary(event, pol)}
     if event.kind == COMMAND and proof.is_check(event.command, pol.proof):
         entry["check"] = "pass" if ok and not proof.output_failed(output, pol.proof) else "fail"

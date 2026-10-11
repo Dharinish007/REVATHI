@@ -187,6 +187,15 @@ failure_output = [
   'collected 0 items',
   '(?i)no tests ran',
 ]
+# Inline scripts can write files without any edit tool or redirect (eval batch 6: `python - <<EOF … open(…, "w")`).
+# After one of these runs, code files changed in the folder since the previous record count as code edits.
+script_commands = [
+  '\b(python[0-9.]*|py)\s+(-\S+\s+)*-(\s|$)',
+  '\b(python[0-9.]*|py)\s+(-\S+\s+)*-c\b',
+  '\b(node|deno|bun)\s+(-\S+\s+)*(-e|--eval|-p|--print)\b',
+  '\b(perl|ruby)\s+(-\S+\s+)*-\w*e\b',
+  '<<-?\s*[\x22\x27]?\w+',
+]
 code_extensions = [".py", ".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".go", ".rs", ".java", ".kt", ".kts",
                    ".c", ".h", ".cc", ".cpp", ".hpp", ".cs", ".rb", ".php", ".swift", ".scala", ".dart",
                    ".vue", ".svelte", ".sh", ".ps1", ".sql", ".lua", ".ex", ".exs"]

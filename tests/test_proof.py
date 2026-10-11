@@ -367,3 +367,56 @@ class ProjectTestScripts(unittest.TestCase):
         for command in ("python setup.py", "python build_test_report.py","cat run_checks.py",
                         "python manage.py runserver", "./deploy.sh"):
             self.assertFalse(proof.is_check(command, pol), command)
+
+
+class ScriptEdits(unittest.TestCase):
+    """Eval batch 6: code edited through an inline script (`python - <<EOF … open(…, 'w')`) was invisible."""
+
+    def setUp(self):
+        self.home = tempfile.mkdtemp(prefix="revathi-home-")
+        self.work = Path(tempfile.mkdtemp(prefix="revathi-work-"))
+        self._old = os.environ.get("REVATHI_HOME")
+        os.environ["REVATHI_HOME"] = self.home
+        (self.work / "old.py").write_text("x = 1\n")
+        (self.work / "node_modules").mkdir()
+        (self.work / "node_modules" / "dep.js").write_text("//")
+        past = __import__("time").time() - 3600
+        for p in (self.work / "old.py", self.work / "node_modules" / "dep.js"):
+            os.utime(p, (past, past))
+
+    def tearDown(self):
+        if self._old is None:
+            os.environ.pop("REVATHI_HOME", None)
+        else:
+            os.environ["REVATHI_HOME"] = self._old
+        shutil.rmtree(self.home, ignore_errors=True)
+        shutil.rmtree(self.work, ignore_errors=True)
+
+    def run_command(self, command):
+        from engine import pipeline
+        from engine.event import COMMAND, Event
+        pipeline.after("s1", Event("claude-code", COMMAND, "Bash", command=command), ok=True, cwd=str(self.work))
+
+    def test_inline_script_edit_is_seen_and_needs_proof(self):
+        from engine import pipeline
+        self.run_command("ls")  # an earlier record: the scan looks for changes after it
+        (self.work / "dates.py").write_text("def parse_date(t):\n    return None\n")
+        self.run_command("python - <<'EOF'\np = 'dates.py'\nopen(p, 'w').write('...')\nEOF")
+        written = [r["path"] for r in log.read("s1") if r.get("via") == "script"]
+        self.assertEqual([os.path.basename(p) for p in written], ["dates.py"])  # not old.py, not node_modules
+        self.assertIsNotNone(pipeline.finish("s1"))  # proof check now applies
+
+    def test_other_commands_do_not_scan(self):
+        self.run_command("ls")
+        (self.work / "dates.py").write_text("x = 2\n")
+        self.run_command("git status")
+        self.assertEqual([r for r in log.read("s1") if r.get("via") == "script"], [])
+
+    def test_script_command_patterns(self):
+        from engine import policy, proof
+        pol = policy.load().proof
+        for c in ("python - <<'EOF'", "python3 -c \"open('a.py','w')\"", "node -e \"fs.writeFileSync('a.js','')\"",
+                  "cat > a.py <<EOF", "perl -e 'print 1'"):
+            self.assertTrue(proof.runs_script(c, pol), c)
+        for c in ("python app.py", "python -m pytest", "ls -la", "git commit -m 'x'"):
+            self.assertFalse(proof.runs_script(c, pol), c)
