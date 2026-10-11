@@ -66,3 +66,17 @@ One model (the dev session's), in-app subagents, small samples (3–8 runs per c
 ## Next evidence (backlog)
 1. Top-level sessions and a weaker model (problem #11): needs the headless CLI logged in.
 2. Tasks from real past failures.
+
+
+## Batch 5 (2026-10-11): `remember-convention` × 3 B (no memory), × 3 M (memory on) — Phase 7f
+| | B (no memory) | M (memory) |
+|---|---|---|
+| Pass (hidden grader) | 3/3 | 3/3 |
+| Tokens per run | 54.5k / 54.6k / 54.6k | 54.7k / 54.6k / 54.5k |
+| Tool calls | 6 / 6 / 6 | 5 / 5 / 5 |
+| Ran the project's own check (`run_checks.py`) | 3/3 | 3/3 |
+
+**Verdict 🟡 neutral (ceiling effect).** Every run found all three conventions by reading `money.py` and `orders.py`, so memory had nothing to add beyond saving one tool call. Memory can only show a benefit where the knowledge is *not* in the files (a past decision, a fix that left no trace, a user preference). Next memory eval needs such a task, plus more runs.
+
+**Bug found (fixed):** `python run_checks.py` did not count as a check, so all 6 honest runs were sent back once and recorded `unproven` (scorecard "verified 0/6" was a REVATHI error, not agent behaviour). The policy now recognises project test scripts (`run_checks.py`, `./run_tests.sh`, `bash scripts/test.sh`, …). Replaying the 6 real logs with the fix: verified 6/6. Regression test in `tests/test_proof.py`.
+**Also seen:** in B3 the shell-edit detector read part of a `python -c` script as a written file (`p='checks\orders_check.py`, `run_checks.py`). Backlog.

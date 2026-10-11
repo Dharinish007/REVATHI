@@ -351,3 +351,19 @@ class BatchThreeBugs(unittest.TestCase):
                 s.edit(str(self.work / "inventory.py"))
                 s.run("python -m pytest -q | tail -5", stdout=out)
                 self.assertIsNotNone(s.stop(), out)
+
+
+class ProjectTestScripts(unittest.TestCase):
+    """Eval 2026-10-11 (remember-convention): `python run_checks.py` was not seen as a check, so 6/6 honest runs
+    were sent back and recorded as unproven."""
+
+    def test_project_scripts_count_as_checks(self):
+        from engine import policy, proof
+        pol = policy.load().proof
+        for command in ("python run_checks.py", "cd repo && python run_checks.py", "python3 -u run_tests.py",
+                        "bash scripts/test.sh", "./run_tests.sh", "./test.sh -v", "py tests.py",
+                        "pwsh ./run-checks.ps1"):
+            self.assertTrue(proof.is_check(command, pol), command)
+        for command in ("python setup.py", "python test_data_builder.py", "cat run_checks.py",
+                        "python manage.py runserver", "./deploy.sh"):
+            self.assertFalse(proof.is_check(command, pol), command)

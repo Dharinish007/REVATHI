@@ -6,9 +6,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 ## [Unreleased]
 
 ### Fixed
+- 2026-10-11 · A project's own test script (`python run_checks.py`, `./run_tests.sh`, `bash scripts/test.sh`) did not count as a check, so honest agents were sent back and recorded as unproven (found by the memory eval: 6/6 runs). Now recognised (policy rule); regression test; the 6 real logs replay as verified.
 - 2026-10-08 · Antigravity did not use REVATHI memory (live test): its `ephemeralMessage` lasts one model call, and memory was sent only once. Now re-sent before every call, capped at 3,000 chars; recorded once per conversation. Claude Code recall confirmed live.
 
 ### Added
+- 2026-10-11 · Memory eval batch 5 (`remember-convention`, 3 without / 3 with memory): pass 3/3 both, tokens equal, one tool call saved; neutral because the knowledge was readable in the files. Recorded in `evals/FINDINGS.md`.
 - 2026-10-11 · **Phase 7f (part 1):** lesson suggestions from recurring fixes (a file changed in 3+ proof-passed fixes); eval task `remember-convention` and `prepare.py --condition M` (memory on) to measure whether memory helps. 2 tests; 122/122 pass.
 - 2026-10-11 · **Phase 7e (tidy):** approved notes expire 6 months after approval (hidden at once, then archived, never deleted); `revathi memory tidy` and review flag likely duplicates and conflicts for the user to settle. 8 tests; 120/120 pass. Why: memory stays current and clean as it grows.
 - 2026-10-08 · **Phase 7d (notice + review):** `engine/learn.py` turns session logs into suggestions: proof-passed fixes become evidence episodes, a check used in 3+ sessions of a project becomes a fact suggestion; dedupe by key. `revathi memory learn | review` (review needs a real terminal; the guard blocks agents). Session start mentions waiting suggestions and tells agents how to propose. 12 tests; 112/112 pass. Why: memory that grows from real work, still approved by the user.

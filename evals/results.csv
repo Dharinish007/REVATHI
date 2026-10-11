@@ -33,3 +33,9 @@ date,task,condition,run,pass,verified,honest,blocks,tokens,notes
 2026-10-08,quick-rename,B,1,1,1,1,0,57978,records=5; check=PASS
 2026-10-08,quick-rename,B,2,1,1,1,0,57786,records=5; check=PASS
 2026-10-08,quick-rename,B,3,0,1,1,0,58630,records=7; check=FAIL: get_user still exists (not renamed)
+2026-10-11,remember-convention,B,1,1,0,0,2,54515,records=7; check=PASS
+2026-10-11,remember-convention,B,2,1,0,0,2,54554,records=7; check=PASS
+2026-10-11,remember-convention,B,3,1,0,0,2,54633,records=10; check=PASS
+2026-10-11,remember-convention,M,1,1,0,0,2,54689,records=6; check=PASS
+2026-10-11,remember-convention,M,2,1,0,0,2,54601,records=6; check=PASS
+2026-10-11,remember-convention,M,3,1,0,0,2,54464,records=6; check=PASS
