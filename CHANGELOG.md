@@ -12,6 +12,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 - 2026-10-08 · Antigravity did not use REVATHI memory (live test): its `ephemeralMessage` lasts one model call, and memory was sent only once. Now re-sent before every call, capped at 3,000 chars; recorded once per conversation. Claude Code recall confirmed live.
 
 ### Added
+- 2026-10-11 · **Phase 7h (graph):** `revathi memory graph` writes one local, offline HTML map of memory (types, places, evidence, conflicts, untrusted and expiring notes; search, views, details with evidence trace). Note text can never run as HTML. 5 tests; 136/136 pass.
 - 2026-10-11 · **Phase 7g (import):** `revathi memory import --from claude [--project <folder>]` suggests Claude Code's own auto-memory notes for review (reader in the Claude adapter; nothing auto-approved; re-import skips known, catches edits; secrets refused). 5 tests; 128/128 pass.
 - 2026-10-11 · Memory eval batch 6 (`past-decision`): planned checks tied; with memory the user's past decision was applied in full and no question was asked (post-hoc measure, so promising, not proven). Edits made through Python scripts are invisible to the proof check (confirmed, backlog).
 - 2026-10-11 · Memory eval batch 5 (`remember-convention`, 3 without / 3 with memory): pass 3/3 both, tokens equal, one tool call saved; neutral because the knowledge was readable in the files. Recorded in `evals/FINDINGS.md`.

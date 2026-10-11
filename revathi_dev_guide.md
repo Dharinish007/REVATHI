@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · 7e ✅ · 7f 🟡 (benefit promising, not proven) · 7g ✅ · next 7h Graph (plan in §8).**
+**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · 7e ✅ · 7f 🟡 (benefit promising, not proven) · 7g ✅ · 7h ✅. Remaining: prove memory's benefit (7f), PyPI publish (user).**
 
 ---
 
@@ -388,6 +388,12 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - Nothing is approved: the user reviews every note. Re-import skips known notes (key = file + content hash), catches edited ones, never re-suggests rejected ones; secrets are refused and reported.
 - Tests `tests/test_import.py` (5); full suite 128/128; adapter file confirmed in the wheel. Live: this machine's Claude memory folders are empty, so 0 notes imported (correct).
 - Not built: Antigravity Knowledge Items import (format only known from third-party sources ❓).
+
+**7h status ✅ (2026-10-11):** `revathi memory graph [--out FILE] [--no-open]` (`cli/graph.py`, D36).
+- One self-contained HTML page (`~/.revathi/graph.html` by default), no network and no libraries: dots per note coloured by type, hubs for you / each project / each tool, evidence links (lesson → its episodes), red conflict and dashed duplicate links. Hollow = waiting for review, red ring = untrusted (changed, forged or expired), faded = archived or expiring within 30 days. Search, views (everything / what agents use / inbox / risks / archive), click for details incl. "why we believe it".
+- Safety: note text is shown with `textContent` only, and the embedded data can't close the script tag, so a note containing HTML or script never runs (tested).
+- Tests `tests/test_graph.py` (5); full suite 136/136. 500 notes → 150 KB page, built in ~1.8 s (the duplicate/conflict check is O(n²); fine for a command, not a hook). Checked in a browser: layout, detail panel with evidence trace, risk filter.
+- Not built: time slider, usage heat (needs usage tracking), approving from the map, team graph (Phase 8).
 
 **Releases:** 7a–7c = v1.1 (safe memory) · 7d–7e = v1.2 (learns) · 7f–7h = v1.3 (expert + graph).
 **Cost (💭):** ≤ ~2,500 tokens injected per session; learning uses no model tokens.

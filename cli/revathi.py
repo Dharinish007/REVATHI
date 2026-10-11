@@ -7,12 +7,13 @@
   revathi log [--session ID] [--all] what the agent did (newest session by default)
   revathi undo [--list] [ID]         restore what an agent action changed or deleted
   revathi canary plant <dir> | status    decoy credentials that reveal hidden instructions
-  revathi memory review|learn|import|propose|list|search|show|approve|reject|forget|check   what agents remember (you approve)
+  revathi memory review|learn|import|graph|propose|list|search|show|approve|reject|forget|check   what agents remember (you approve)
 """
 import argparse
 import getpass
 import importlib.util
 import sys
+import webbrowser
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # REVATHI root, for "engine"
@@ -20,8 +21,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # REVATHI root, fo
 from engine import canary, config, learn, log, memory, undo  # noqa: E402
 
 try:
-    import install as installer  # same folder (cli/)
+    import graph  # same folder (cli/)
+    import install as installer
 except ImportError:
+    from cli import graph
     from cli import install as installer
 
 MODE_HELP = {
@@ -229,6 +232,15 @@ def cmd_memory(args):
                 print(f"{n['id']}  {m.get('type', '?'):<10}  {m.get('title', '')}")
         elif args.action == "learn":
             _learn_summary(learn.mine())
+        elif args.action == "graph":
+            out = Path(args.out) if args.out else log.home() / "graph.html"
+            out.parent.mkdir(parents=True, exist_ok=True)
+            data = graph.graph_data()
+            out.write_text(graph.html(data), encoding="utf-8")
+            notes = sum(1 for n in data["nodes"] if n["kind"] == "note")
+            print(f"🕸️ Memory map with {notes} note(s): {out}\nIt is a local file: nothing is uploaded.")
+            if not args.no_open:
+                webbrowser.open(out.resolve().as_uri())
         elif args.action == "import":
             return _import(args.project)
         elif args.action == "tidy":
@@ -326,6 +338,9 @@ def main(argv=None):
     q.add_argument("--inbox", action="store_true")
     q.add_argument("--archive", action="store_true")
     msub.add_parser("learn", help="turn your recent sessions into suggestions (nothing is approved)")
+    q = msub.add_parser("graph", help="open a local map of what your agents know")
+    q.add_argument("--out", help="where to save the page (default: ~/.revathi/graph.html)")
+    q.add_argument("--no-open", action="store_true", help="save only, don't open the browser")
     q = msub.add_parser("import", help="suggest Claude Code's own memory notes for review (nothing is approved)")
     q.add_argument("--from", dest="source", choices=["claude"], default="claude")
     q.add_argument("--project", help="also import this project's notes (its folder)")
