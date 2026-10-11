@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · 7e ✅ · next 7f Expert + proof (plan in §8).**
+**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · 7e ✅ · 7f 🟡 (benefit promising, not proven) · 7g ✅ · next 7h Graph (plan in §8).**
 
 ---
 
@@ -382,6 +382,12 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - Ladder step 1: episodes now keep their files and check; a file changed in 3+ separate proof-passed fixes in one project becomes a **lesson suggestion** ("`calc.py` is a common cause of failing checks…"), sources = the episodes. 2 tests; suite 122/122.
 - Step 2 (lesson → skill) not automated: a skill needs a written procedure, which plain code can't produce honestly. Agents propose skills with `revathi memory propose --type skill`; exporting approved skills into each tool's skills folder is still to build.
 - Eval: new task `evals/tasks/remember-convention` (three discoverable-but-hidden conventions: integer cents with half-up rounding, ValueError on bad input, checks via `run_checks.py`); grader verified (naive `round()` fails, correct passes). `evals/prepare.py --condition M` adds the task's `memory.md` (the exact injected text) to the prompt, because subagents don't get the SessionStart hook. **Run 2026-10-11 (3 B + 3 M):** pass 3/3 vs 3/3, tokens equal (~54.6k), memory saved one tool call per run → 🟡 neutral (ceiling: the conventions were readable in the files). Found and fixed a proof bug: project test scripts (`python run_checks.py`) were not recognised as checks. Memory is **not yet proven** to help; the next eval needs knowledge that is not in the files. Details: `evals/FINDINGS.md` batch 5. **Second eval (`past-decision`, knowledge only in memory):** planned checks tied 3/3; with memory the user's past decision was applied in full (invalid dates too, 3/3 vs 0/3) and no clarifying question was needed (0/3 vs 3/3); +1.3k tokens. 🟡 promising, not proven (that measure was post-hoc). Found: test files run directly weren't counted (fixed); edits made through Python scripts are invisible to the proof check (backlog). Details: batch 6.
+
+**7g status ✅ (2026-10-11):** `revathi memory import --from claude [--project <folder>]`.
+- The reader lives in the Claude adapter (`adapters/claude-code/memory_import.py`), so the engine stays tool-neutral. It reads `~/.claude/projects/<project>/memory/*.md` (or `CLAUDE_CONFIG_DIR`), skips `MEMORY.md`, maps Claude types (user → fact, feedback → preference, project/reference → project fact) and proposes each note to the inbox as `claude-code-auto-memory`. User and feedback notes come from every project; project notes only for the folder given with `--project`.
+- Nothing is approved: the user reviews every note. Re-import skips known notes (key = file + content hash), catches edited ones, never re-suggests rejected ones; secrets are refused and reported.
+- Tests `tests/test_import.py` (5); full suite 128/128; adapter file confirmed in the wheel. Live: this machine's Claude memory folders are empty, so 0 notes imported (correct).
+- Not built: Antigravity Knowledge Items import (format only known from third-party sources ❓).
 
 **Releases:** 7a–7c = v1.1 (safe memory) · 7d–7e = v1.2 (learns) · 7f–7h = v1.3 (expert + graph).
 **Cost (💭):** ≤ ~2,500 tokens injected per session; learning uses no model tokens.

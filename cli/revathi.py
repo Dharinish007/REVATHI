@@ -7,10 +7,11 @@
   revathi log [--session ID] [--all] what the agent did (newest session by default)
   revathi undo [--list] [ID]         restore what an agent action changed or deleted
   revathi canary plant <dir> | status    decoy credentials that reveal hidden instructions
-  revathi memory review|learn|propose|list|search|show|approve|reject|forget|check   what agents remember (you approve)
+  revathi memory review|learn|import|propose|list|search|show|approve|reject|forget|check   what agents remember (you approve)
 """
 import argparse
 import getpass
+import importlib.util
 import sys
 from pathlib import Path
 
@@ -134,6 +135,32 @@ def _learn_summary(result):
           f"{result['episodes']} fix record(s) saved as evidence.")
 
 
+def _import(project):
+    """Claude Code auto memory -> inbox suggestions (never approved here). The reader lives in the Claude adapter."""
+    spec = importlib.util.spec_from_file_location(
+        "claude_memory_import", Path(__file__).resolve().parents[1] / "adapters" / "claude-code" / "memory_import.py")
+    reader = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(reader)
+    known = {(n["meta"].get("x-revathi") or {}).get("key") for n in memory.notes()}
+    added, skipped = 0, []
+    for n in reader.notes(memory.parse, project=project):
+        if n["key"] in known:
+            continue
+        try:
+            memory.propose(n["type"], n["title"], n["body"], n["sources"], scope=n["scope"], project=n["project"],
+                           by="claude-code-auto-memory", key=n["key"])
+            added += 1
+        except ValueError as exc:
+            skipped.append(f"{n['sources'][0]}: {exc}")
+    print(f"Imported {added} note(s) from Claude Code's memory into your inbox. Nothing is used until you approve it: "
+          f"run `revathi memory review` in your own terminal.")
+    if not project:
+        print("Project notes are only imported for one project at a time: add --project <folder>.")
+    for line in skipped:
+        print(f"  ⚠️ not imported: {line}")
+    return 0
+
+
 def _tidy():
     """Archive expired notes; return {note id: [warnings]} for likely duplicates and conflicts."""
     for n in memory.expire():
@@ -202,6 +229,8 @@ def cmd_memory(args):
                 print(f"{n['id']}  {m.get('type', '?'):<10}  {m.get('title', '')}")
         elif args.action == "learn":
             _learn_summary(learn.mine())
+        elif args.action == "import":
+            return _import(args.project)
         elif args.action == "tidy":
             if not _tidy():
                 print("Memory is tidy: no duplicates or conflicts found.")
@@ -297,6 +326,9 @@ def main(argv=None):
     q.add_argument("--inbox", action="store_true")
     q.add_argument("--archive", action="store_true")
     msub.add_parser("learn", help="turn your recent sessions into suggestions (nothing is approved)")
+    q = msub.add_parser("import", help="suggest Claude Code's own memory notes for review (nothing is approved)")
+    q.add_argument("--from", dest="source", choices=["claude"], default="claude")
+    q.add_argument("--project", help="also import this project's notes (its folder)")
     msub.add_parser("tidy", help="archive expired notes; list likely duplicates and conflicts")
     msub.add_parser("review", help="approve or reject suggestions one by one (in your own terminal)")
     q = msub.add_parser("search", help="find approved notes that match some words")
