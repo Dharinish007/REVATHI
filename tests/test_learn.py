@@ -101,6 +101,32 @@ class Episodes(Base):
         self.assertEqual(learn.mine()["episodes"], 0)
 
 
+class Ladder(Base):
+    def fix(self, session, path="/repo/calc.py"):
+        self.check(session, "pytest -q", "fail")
+        self.edit(session, path)
+        self.check(session, "pytest -q", "pass")
+
+    def test_same_file_in_three_fixes_becomes_a_lesson_suggestion(self):
+        for s in ("s1", "s2", "s3"):
+            self.fix(s)
+        lessons = [n for n in learn.mine()["proposed"] if n["meta"]["type"] == "lesson"]
+        self.assertEqual(len(lessons), 1)
+        meta = lessons[0]["meta"]
+        self.assertIn("calc.py", meta["title"])
+        self.assertEqual(meta["x-revathi"]["project"], "p1")
+        self.assertEqual(len(meta["sources"]), 3)
+        self.assertTrue(all(s.startswith("memory:m-") for s in meta["sources"]))
+        self.assertEqual(memory.approved(), [])
+        self.assertEqual([n for n in learn.mine()["proposed"] if n["meta"]["type"] == "lesson"], [])
+
+    def test_two_fixes_or_different_files_give_no_lesson(self):
+        self.fix("s1")
+        self.fix("s2")
+        self.fix("s3", path="/repo/other.py")
+        self.assertEqual([n for n in learn.mine()["proposed"] if n["meta"]["type"] == "lesson"], [])
+
+
 class Recorder(Base):
     def test_checks_are_recorded_with_their_project(self):
         work = tempfile.mkdtemp(prefix="revathi-proj-")

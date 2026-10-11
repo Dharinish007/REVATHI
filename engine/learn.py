@@ -61,6 +61,29 @@ def _episodes(session, records, pol):
     return found
 
 
+def _lessons(known):
+    """Ladder step 1 (D33): a file changed in MIN_SESSIONS+ separate proof-passed fixes becomes a lesson suggestion."""
+    hotspots = {}  # (project, file) -> [episode records]
+    for n in memory.notes("episode"):
+        extra = n["meta"].get("x-revathi") or {}
+        for name in extra.get("files") or []:
+            hotspots.setdefault((extra.get("project"), name), []).append(n)
+    proposed = []
+    for (project, name), found in sorted(hotspots.items(), key=lambda kv: (str(kv[0][0]), kv[0][1])):
+        key = f"hotspot:{project}:{name}"
+        if len(found) < MIN_SESSIONS or key in known:
+            continue
+        checks = sorted({(e["meta"].get("x-revathi") or {}).get("check") or "?" for e in found})
+        proposed.append(memory.propose(
+            "lesson", f"`{name}` is a common cause of failing checks",
+            f"In {len(found)} separate fixes, changing `{name}` made failing checks pass "
+            f"({', '.join(f'`{c}`' for c in checks)}). When these checks fail, look at `{name}` first.",
+            [f"memory:{e['id']}" for e in found[:5]], scope="project" if project else "user",
+            project_key=project, by="revathi-learner", key=key))
+        known.add(key)
+    return proposed
+
+
 def mine():
     """Read every session log; record new episodes and propose new facts. Returns a summary dict."""
     pol = policy.load().proof
@@ -80,9 +103,11 @@ def mine():
                 continue
             memory.record_episode(f"Fixed a failing `{check}` by changing {', '.join(files[:5])}",
                                   f"`{check}` failed, then {', '.join(files)} changed, then it passed.",
-                                  [f"log:{session}#{digest[:12]}"], key=key, project_key=project)
+                                  [f"log:{session}#{digest[:12]}"], key=key, project_key=project,
+                                  files=files, check=check)
             known.add(key)
             episodes += 1
+    proposed += _lessons(known)
     for (project, check), sessions in sorted(passes.items()):
         key = f"check:{project}:{check}"
         if len(sessions) < MIN_SESSIONS or key in known:

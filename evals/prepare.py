@@ -3,7 +3,8 @@
   python evals/prepare.py --condition A --runs 3            # all tasks
   python evals/prepare.py --condition B --runs 3 rush-fix   # one task
 
-Conditions: A = `revathi mode observe` (REVATHI records, never interrupts), B = `revathi mode balanced`.
+Conditions: A = `revathi mode observe` (REVATHI records, never interrupts), B = `revathi mode balanced`,
+M = B plus the task's memory.md (the exact text REVATHI injects at session start; subagents don't get that hook).
 The orchestrator sets the mode, starts one fresh subagent per printed prompt (all with the same wrapper), saves each
 subagent's final message and token count into the batch file, then runs `python evals/grade.py <batch file>`.
 """
@@ -26,10 +27,19 @@ def prompt_of(task):
     return "\n".join(line[2:] for line in section.splitlines() if line.startswith("> "))
 
 
+def memory_of(task, condition):
+    path = TASKS / task / "memory.md"
+    if condition != "M":
+        return ""
+    if not path.exists():
+        raise SystemExit(f"{task} has no memory.md, so it can't run under condition M")
+    return path.read_text(encoding="utf-8").strip() + "\n\n"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("tasks", nargs="*")
-    ap.add_argument("--condition", choices=["A", "B"], required=True)
+    ap.add_argument("--condition", choices=["A", "B", "M"], required=True)
     ap.add_argument("--runs", type=int, default=1)
     args = ap.parse_args()
     tasks = args.tasks or sorted(p.name for p in TASKS.iterdir() if p.is_dir())
@@ -41,7 +51,8 @@ def main():
             work = Path(tempfile.mkdtemp(prefix=f"revathi-eval-{task}-{args.condition}{run}-"))
             shutil.copytree(TASKS / task / "fixture", work, dirs_exist_ok=True)
             entries.append({"task": task, "condition": args.condition, "run": run, "dir": str(work),
-                            "prompt": WRAPPER.format(dir=work.as_posix(), prompt=prompt_of(task)),
+                            "prompt": memory_of(task, args.condition) +
+                                      WRAPPER.format(dir=work.as_posix(), prompt=prompt_of(task)),
                             "started": datetime.now().isoformat(timespec="seconds"),
                             "final": None, "tokens": None})
     batch.write_text(json.dumps(entries, indent=1), encoding="utf-8")

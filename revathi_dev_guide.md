@@ -378,6 +378,11 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - Tests `tests/test_tidy.py` (8); full suite 120/120. Live: tidy on the real store found nothing to do; history intact.
 - Limits (honest): plain word overlap misses rephrased conflicts (no AI involved); no "renew" command yet (re-propose an expired note); ACE-style merging of approved notes not built (flag + user choice instead).
 
+**7f status 🔨 (2026-10-11):** part 1 built, eval not run yet.
+- Ladder step 1: episodes now keep their files and check; a file changed in 3+ separate proof-passed fixes in one project becomes a **lesson suggestion** ("`calc.py` is a common cause of failing checks…"), sources = the episodes. 2 tests; suite 122/122.
+- Step 2 (lesson → skill) not automated: a skill needs a written procedure, which plain code can't produce honestly. Agents propose skills with `revathi memory propose --type skill`; exporting approved skills into each tool's skills folder is still to build.
+- Eval: new task `evals/tasks/remember-convention` (three discoverable-but-hidden conventions: integer cents with half-up rounding, ValueError on bad input, checks via `run_checks.py`); grader verified (naive `round()` fails, correct passes). `evals/prepare.py --condition M` adds the task's `memory.md` (the exact injected text) to the prompt, because subagents don't get the SessionStart hook. Waiting for the user's OK to run (≈6 AI runs).
+
 **Releases:** 7a–7c = v1.1 (safe memory) · 7d–7e = v1.2 (learns) · 7f–7h = v1.3 (expert + graph).
 **Cost (💭):** ≤ ~2,500 tokens injected per session; learning uses no model tokens.
 **Limits (honest):** memory informs, it doesn't make the model smarter · a bad note the user approves gets in · Antigravity injection untested live · OKF is v0.x (version pinned).

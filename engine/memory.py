@@ -232,9 +232,10 @@ def propose(type, title, body, sources, scope="user", project=None, tool=None, b
     return _record(path)
 
 
-def record_episode(title, body, sources, key, project_key=None):
+def record_episode(title, body, sources, key, project_key=None, files=(), check=None):
     """Evidence from a proof-passed fix, recorded automatically. Never shown to the agent (only approved notes are)."""
-    extra = {"approval": "auto", "risk": "low", "scope": "project" if project_key else "user", "key": key}
+    extra = {"approval": "auto", "risk": "low", "scope": "project" if project_key else "user", "key": key,
+             "files": list(files), "check": check}
     if project_key:
         extra["project"] = project_key
     meta = {"type": "episode", "title": title, "okf_version": OKF_VERSION, "status": "stable", "sources": sources,
