@@ -6,7 +6,7 @@ The single source of truth for anyone building REVATHI, human or AI. Read the se
 
 **Handoff (2026-10-11), start here in a new chat:**
 - State: Phases 0–7 done · 1.0.0rc1 live on GitHub + PyPI · 136/136 tests, CI green · all decisions D1–D36 settled (D13 replaced by D27; D35 accepted as opt-in, not built).
-- Next, in order: ① GitHub trusted publishing (no tokens) ② live Antigravity test of guard + proof (A1–A3) → then 1.0.0 final (D28) ③ build D35 (opt-in prompt recording → learn from corrections) ④ Phase 8: Codex / Cursor / Gemini CLI adapters, starter packs, team mode.
+- Next, in order: ① GitHub trusted publishing: workflow added (`publish.yml`); user must add the trusted publisher on pypi.org, then test with the next release ② live Antigravity test of guard + proof (A1–A3) → then 1.0.0 final (D28) ③ build D35 (opt-in prompt recording → learn from corrections) ④ Phase 8: Codex / Cursor / Gemini CLI adapters, starter packs, team mode.
 - Backlog: send-back lists every changed file of the session; scratch `.py` files outside the project count as code; shell-edit parser misreads parts of `python -c`; recall ~85 ms at 1,000 notes; graph builds slowly at 500+ notes; Antigravity 2.0 loads no hooks (cause unknown); `learn` skill still points at Agentic OS files; PyPI summary omits memory (fix in next version).
 
 ---
@@ -320,6 +320,7 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [x] GitHub repo `Dharinish007/REVATHI` live; CI green on `e20a6d1` (2026-10-08)
 - [x] **Published to PyPI 2026-10-11** by the user: https://pypi.org/project/revathi/1.0.0rc1/ · verified: fresh venv `pip install revathi` → 1.0.0rc1, `revathi --help`, memory commands, `install --dry-run` all work. Note: that version's PyPI summary doesn't mention memory (fix in the next version's metadata)
 - [ ] Live tests still pending: Antigravity IDE (A1–A3), Claude C2 (canary curl)
+  - A1 guard deny: `rm -rf ~/revathi-a1-test` blocked, plain-English reason · A2 guard ask: `git push --force` → user asked · A3 proof: code written, "done" with no check → Stop sends back. Pass = seen in the IDE **and** in `~/.revathi/logs`.
 
 ### Phase 7 plan: 🧠 Second brain (💭 planned 2026-10-08; decisions D29–D36 Proposed)
 **Goal:** the agent remembers facts, preferences, past fixes and learned procedures across sessions and tools, learns from repeated proven work, and never keeps anything the user didn't approve.
