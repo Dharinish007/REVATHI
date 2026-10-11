@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "revathi"
 version = "1.0.0"
-description = "The trust layer for AI agents: guard, proof before done, undo a tamper-evident record and approved memory for Claude Code and Antigravity."
+description = "The trust layer for AI agents: guard, proof before done, undo, a tamper-evident record and approved memory for Claude Code and Antigravity."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

@@ -5,7 +5,8 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 
 ## [Unreleased]
 
-## [1.0.0] - 2026-10-11 (prepared, not yet published)
+## [1.0.0] - 2026-10-11
+Published to PyPI through the trusted-publishing workflow (first use). Its PyPI summary misses a comma; fixed for the next version.
 Final release: the live tests D28 waited for have passed.
 
 ### Verified
