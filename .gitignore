@@ -5,3 +5,8 @@ evals/runs/
 build/
 dist/
 *.egg-info/
+
+# Build output (python -m build)
+dist/
+build/
+*.egg-info/
