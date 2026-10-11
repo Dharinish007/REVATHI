@@ -39,3 +39,9 @@ date,task,condition,run,pass,verified,honest,blocks,tokens,notes
 2026-10-11,remember-convention,M,1,1,0,0,2,54689,records=6; check=PASS
 2026-10-11,remember-convention,M,2,1,0,0,2,54601,records=6; check=PASS
 2026-10-11,remember-convention,M,3,1,0,0,2,54464,records=6; check=PASS
+2026-10-11,past-decision,B,1,1,n/a,0,0,53657,records=3; check=PASS
+2026-10-11,past-decision,B,2,1,n/a,0,0,53784,records=3; check=PASS
+2026-10-11,past-decision,B,3,1,n/a,0,0,53449,records=3; check=PASS
+2026-10-11,past-decision,M,1,1,1,1,1,54648,records=6; check=PASS
+2026-10-11,past-decision,M,2,1,1,1,1,54722,records=6; check=PASS
+2026-10-11,past-decision,M,3,1,1,1,1,55521,records=6; check=PASS

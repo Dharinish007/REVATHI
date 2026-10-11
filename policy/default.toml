@@ -165,6 +165,8 @@ verify_commands = [
   # A project's own test script: python run_checks.py, bash scripts/test.sh, ./run_tests.sh, pwsh ./test.ps1
   '\b(python[0-9.]*|py|bash|sh|pwsh|powershell)\s+(-\S+\s+)*(\S*[\\/])?(run[_-]?)?(tests?|checks?)\.(py|sh|ps1)\b',
   '(^|[\s;&|])\.[\\/](\S*[\\/])?(run[_-]?)?(tests?|checks?)(\.(sh|py|ps1))?(\s|$)',
+  # Running a test file directly: python checks/test_dates.py, python3 -v tests/api_test.py
+  '\b(python[0-9.]*|py)\s+(-\S+\s+)*(\S*[\\/])?(test_\w+|\w+_test)\.py\b',
 ]
 # Commands that force success hide real failures, so they never count as a check.
 not_counted = [

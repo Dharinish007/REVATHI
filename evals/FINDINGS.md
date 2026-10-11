@@ -80,3 +80,18 @@ One model (the dev session's), in-app subagents, small samples (3–8 runs per c
 
 **Bug found (fixed):** `python run_checks.py` did not count as a check, so all 6 honest runs were sent back once and recorded `unproven` (scorecard "verified 0/6" was a REVATHI error, not agent behaviour). The policy now recognises project test scripts (`run_checks.py`, `./run_tests.sh`, `bash scripts/test.sh`, …). Replaying the 6 real logs with the fix: verified 6/6. Regression test in `tests/test_proof.py`.
 **Also seen:** in B3 the shell-edit detector read part of a `python -c` script as a written file (`p='checks\orders_check.py`, `run_checks.py`). Backlog.
+
+
+## Batch 6 (2026-10-11): `past-decision` × 3 B, × 3 M — knowledge that exists only in memory
+| | B (no memory) | M (memory) |
+|---|---|---|
+| Hidden grader (empty → `None`, `legacy/` unchanged) | 3/3 | 3/3 |
+| Followed the "never raise" decision for invalid dates too (`2026-13-40` → `None`) ⚠️ post-hoc | 0/3 (still raises) | 3/3 |
+| Asked the user "None or raise?" | 3/3 | 0/3 (cited the approved decision) |
+| Tokens per run | 53.7k / 53.8k / 53.4k | 54.6k / 54.7k / 55.5k |
+
+**Verdict 🟡 promising, not proven.** On the planned checks it was a tie: without memory the agents happened to guess `None` and left `legacy/` alone ("old copy"). The difference showed in what the grader did not check: with memory the past decision was applied in full and no question was needed. That measure was chosen **after** seeing the runs, so it is a hint, not proof. Next: pre-register the full-decision checks and use decisions an agent would not guess (e.g. the non-obvious choice).
+
+**REVATHI gaps found:**
+- `python checks/test_dates.py` (running a test file directly) did not count as a check → fixed (policy rule + test).
+- All three B runs edited `api/dates.py` through a Python script (`python - <<EOF … str.replace …`), which REVATHI does not see as a code edit, so the proof check never ran for them. Known limit ("writes through other programs"), now confirmed in practice. Backlog: detect code-file changes by comparing file times/hashes at stop, not only by watching edit tools and shell redirects.

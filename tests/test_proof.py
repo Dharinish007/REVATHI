@@ -362,8 +362,8 @@ class ProjectTestScripts(unittest.TestCase):
         pol = policy.load().proof
         for command in ("python run_checks.py", "cd repo && python run_checks.py", "python3 -u run_tests.py",
                         "bash scripts/test.sh", "./run_tests.sh", "./test.sh -v", "py tests.py",
-                        "pwsh ./run-checks.ps1"):
+                        "pwsh ./run-checks.ps1", "python checks/test_dates.py", "python3 -v tests/api_test.py"):
             self.assertTrue(proof.is_check(command, pol), command)
-        for command in ("python setup.py", "python test_data_builder.py", "cat run_checks.py",
+        for command in ("python setup.py", "python build_test_report.py","cat run_checks.py",
                         "python manage.py runserver", "./deploy.sh"):
             self.assertFalse(proof.is_check(command, pol), command)
