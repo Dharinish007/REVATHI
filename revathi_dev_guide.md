@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · next 7e Tidy (plan in §8).**
+**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · 7e ✅ · next 7f Expert + proof (plan in §8).**
 
 ---
 
@@ -371,6 +371,12 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - Tests `tests/test_learn.py` (12); full suite 112/112. **Live:** on this machine's real logs the learner found 3 genuine fix episodes and 0 facts (older logs have no project id).
 - Not done (honest): learning from user corrections (needs D35); repeated command sequences → lessons (moved to 7f); the `learn` skill still points at Agentic OS files; "10 reviewed in <2 min" not timed with a real user yet. 💭 One live episode lumps files from a long session together.
 - Developer note: the shield's command patterns also match those words inside other commands (e.g. a commit message or edit script that mentions them); during REVATHI development use files for such text.
+
+**7e status ✅ (2026-10-11):** `revathi memory tidy`, also run at the start of review.
+- Expiry (D33): approval writes `stale_after` = approval date + 180 days; a note past its date is no longer shown to agents (checked on every recall, even before tidy runs) and tidy archives it (`expire` in the history). Notes without the field use their approval date. This is the only automatic change, because it only removes trust.
+- Duplicates and conflicts: word overlap (code spans removed) among approved + waiting notes of the same type and place; same `code` values = likely duplicate, different `code` values = possible conflict. Shown in tidy and next to the note in review; only the user rejects or forgets.
+- Tests `tests/test_tidy.py` (8); full suite 120/120. Live: tidy on the real store found nothing to do; history intact.
+- Limits (honest): plain word overlap misses rephrased conflicts (no AI involved); no "renew" command yet (re-propose an expired note); ACE-style merging of approved notes not built (flag + user choice instead).
 
 **Releases:** 7a–7c = v1.1 (safe memory) · 7d–7e = v1.2 (learns) · 7f–7h = v1.3 (expert + graph).
 **Cost (💭):** ≤ ~2,500 tokens injected per session; learning uses no model tokens.

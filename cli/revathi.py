@@ -134,12 +134,26 @@ def _learn_summary(result):
           f"{result['episodes']} fix record(s) saved as evidence.")
 
 
+def _tidy():
+    """Archive expired notes; return {note id: [warnings]} for likely duplicates and conflicts."""
+    for n in memory.expire():
+        print(f"🗃️ expired after 6 months, archived: {n['meta'].get('title')} ({n['id']})")
+    flags = {}
+    for f in memory.findings():
+        a, b = f["a"], f["b"]
+        what = "looks like a duplicate of" if f["kind"] == "duplicate" else "may contradict"
+        flags.setdefault(b["id"], []).append(f"{what} {a['id']} \"{a['meta'].get('title')}\"")
+        flags.setdefault(a["id"], []).append(f"{what} {b['id']} \"{b['meta'].get('title')}\"")
+    return flags
+
+
 def _review():
     """Go through the inbox one note at a time. Only a person at a terminal can do this (agents are blocked)."""
     if not sys.stdin.isatty():
         print("Review needs you at a terminal: run `revathi memory review` in your own terminal window.")
         return 1
     _learn_summary(learn.mine())
+    flags = _tidy()
     waiting = memory.notes("inbox")
     if not waiting:
         print("Nothing to review. 🎉")
@@ -153,6 +167,8 @@ def _review():
               f"{(m.get('generated') or {}).get('by', '?')} · risk {extra.get('risk', '?')}")
         print(f"  from: {', '.join(map(str, m.get('sources') or []))}")
         print("  " + n["body"].strip().replace("\n", "\n  "))
+        for warning in flags.get(n["id"], []):
+            print(f"  ⚠️ {warning}")
         while True:
             answer = input("  [a]pprove  [r]eject  [s]kip  [q]uit > ").strip().lower()[:1]
             if answer in ("a", "r", "s", "q"):
@@ -186,6 +202,13 @@ def cmd_memory(args):
                 print(f"{n['id']}  {m.get('type', '?'):<10}  {m.get('title', '')}")
         elif args.action == "learn":
             _learn_summary(learn.mine())
+        elif args.action == "tidy":
+            if not _tidy():
+                print("Memory is tidy: no duplicates or conflicts found.")
+            for f in memory.findings():
+                what = "look like duplicates" if f["kind"] == "duplicate" else "may contradict each other"
+                print(f"⚠️ {f['a']['id']} \"{f['a']['meta'].get('title')}\" and "
+                      f"{f['b']['id']} \"{f['b']['meta'].get('title')}\" {what}. Reject or forget one.")
         elif args.action == "review":
             return _review()
         elif args.action == "search":
@@ -274,6 +297,7 @@ def main(argv=None):
     q.add_argument("--inbox", action="store_true")
     q.add_argument("--archive", action="store_true")
     msub.add_parser("learn", help="turn your recent sessions into suggestions (nothing is approved)")
+    msub.add_parser("tidy", help="archive expired notes; list likely duplicates and conflicts")
     msub.add_parser("review", help="approve or reject suggestions one by one (in your own terminal)")
     q = msub.add_parser("search", help="find approved notes that match some words")
     q.add_argument("words", nargs="+")

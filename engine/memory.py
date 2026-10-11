@@ -11,7 +11,7 @@ import json
 import math
 import os
 import re
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from engine import log, policy
@@ -256,6 +256,7 @@ def approve(note_id, by):
     meta, body = _load(path)
     meta["status"] = "stable"
     meta["verified"] = list(meta.get("verified") or []) + [{"by": f"human:{by}", "at": _now()}]
+    meta["stale_after"] = (datetime.now(timezone.utc) + timedelta(days=STALE_DAYS)).date().isoformat()
     meta.setdefault("x-revathi", {})["approval"] = "approved"
     target = _folder(meta) / path.name
     _write(target, meta, body)
@@ -313,7 +314,70 @@ def approved():
     """Notes the agent may rely on: in an approved folder, valid, and unchanged since the user approved them."""
     hashes = _approved_hashes()
     return [n for n in notes("approved")
-            if not problems(n["meta"]) and status(n["meta"]) == "stable" and hashes.get(n["id"]) == n["sha"]]
+            if not problems(n["meta"]) and status(n["meta"]) == "stable" and hashes.get(n["id"]) == n["sha"]
+            and not stale(n["meta"])]
+
+
+# ---- tidy: expiry, duplicates, conflicts (7e). Only expiry acts on its own, because it only removes trust ----
+
+STALE_DAYS = 180  # D33: a note expires 6 months after approval unless approved again
+
+
+def stale(meta, today=None):
+    """True once the note's stale_after date (or approval date + STALE_DAYS) has passed."""
+    when = str(meta.get("stale_after") or "")[:10]
+    if not when:
+        approved_at = str(((meta.get("verified") or [{}])[-1]).get("at", ""))[:10]
+        if not approved_at:
+            return False
+        try:
+            when = (datetime.fromisoformat(approved_at) + timedelta(days=STALE_DAYS)).date().isoformat()
+        except ValueError:
+            return True  # unreadable date: don't trust it
+    return (today or datetime.now(timezone.utc).date().isoformat()) > when
+
+
+def expire(today=None):
+    """Archive approved notes past their date. Returns their records (archived, never deleted)."""
+    def change(meta):
+        meta["status"] = "deprecated"
+        meta.setdefault("x-revathi", {})["invalid_at"] = _now()
+    return [_archive(n["id"], "expire", change) for n in notes("approved") if stale(n["meta"], today)]
+
+
+_CODE = re.compile(r"`([^`]+)`")
+
+
+def _shape(n):
+    text = f"{n['meta'].get('title', '')} {n['body']}"
+    return set(_words(_CODE.sub(" ", text))), {c.strip().lower() for c in _CODE.findall(text)}
+
+
+def _same_place(a, b):
+    xa, xb = a["meta"].get("x-revathi") or {}, b["meta"].get("x-revathi") or {}
+    return (a["meta"].get("type") == b["meta"].get("type") and xa.get("scope") == xb.get("scope")
+            and xa.get("project") == xb.get("project") and xa.get("tool") == xb.get("tool"))
+
+
+def findings():
+    """Likely duplicates and conflicts among waiting and approved notes, for the user to settle.
+
+    duplicate: nearly the same words and the same `code` values. conflict: similar words but different `code`
+    values (e.g. `pytest -q` vs `nose`). Plain word overlap: it misses rephrased conflicts (no AI involved)."""
+    pool = approved() + notes("inbox")
+    found = []
+    for i, a in enumerate(pool):
+        wa, ca = _shape(a)
+        for b in pool[i + 1:]:
+            if not _same_place(a, b):
+                continue
+            wb, cb = _shape(b)
+            overlap = len(wa & wb) / (len(wa | wb) or 1)
+            if overlap >= 0.8 and ca == cb:
+                found.append({"kind": "duplicate", "a": a, "b": b})
+            elif overlap >= 0.5 and ca and cb and ca != cb:
+                found.append({"kind": "conflict", "a": a, "b": b})
+    return found
 
 
 # ---- recall: what a new session is told, and search on demand (7b) ----
