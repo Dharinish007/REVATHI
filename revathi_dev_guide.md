@@ -2,12 +2,12 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 6 (Launch) ✅ live on GitHub + PyPI (1.0.0rc1)** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · 7e ✅ · 7f ✅ (benefit proven for decisions not in the code) · 7g ✅ · 7h ✅. Next: Phase 8 (expand), after the user's decisions.**
+**Current phase:** **Phase 6 (Launch) ✅ live on GitHub + PyPI (1.0.0rc1; 1.0.0 prepared, not published)** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ (Antigravity IDE live-tested 2026-10-11) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · 7e ✅ · 7f ✅ (benefit proven for decisions not in the code) · 7g ✅ · 7h ✅. Next: Phase 8 (expand), after the user's decisions.**
 
 **Handoff (2026-10-11), start here in a new chat:**
-- State: Phases 0–7 done · 1.0.0rc1 live on GitHub + PyPI · 136/136 tests, CI green · all decisions D1–D36 settled (D13 replaced by D27; D35 accepted as opt-in, not built).
-- Next, in order: ① GitHub trusted publishing: workflow added (`publish.yml`); user must add the trusted publisher on pypi.org, then test with the next release ② live Antigravity test of guard + proof (A1–A3) → then 1.0.0 final (D28) ③ build D35 (opt-in prompt recording → learn from corrections) ④ Phase 8: Codex / Cursor / Gemini CLI adapters, starter packs, team mode.
-- Backlog: send-back lists every changed file of the session; scratch `.py` files outside the project count as code; shell-edit parser misreads parts of `python -c`; recall ~85 ms at 1,000 notes; graph builds slowly at 500+ notes; Antigravity 2.0 loads no hooks (cause unknown); `learn` skill still points at Agentic OS files; PyPI summary omits memory (fix in next version).
+- State: Phases 0–7 done · 1.0.0 prepared (not published) · 1.0.0rc1 live on GitHub + PyPI · 136/136 tests, CI green · all decisions D1–D36 settled (D13 replaced by D27; D35 accepted as opt-in, not built).
+- Next, in order: ① GitHub trusted publishing: workflow added (`publish.yml`); user must add the trusted publisher on pypi.org, then test with the next release ② ✅ live tests A1–A3 + C2 passed (2026-10-11) → 1.0.0 prepared; publish it via a GitHub release `v1.0.0` once ① is linked (user) ③ build D35 (opt-in prompt recording → learn from corrections) ④ Phase 8: Codex / Cursor / Gemini CLI adapters, starter packs, team mode.
+- Backlog: send-back lists every changed file of the session; scratch `.py` files outside the project count as code; shell-edit parser misreads parts of `python -c`; recall ~85 ms at 1,000 notes; graph builds slowly at 500+ notes; Antigravity 2.0 loads no hooks (cause unknown); Antigravity IDE once refused a safe `write_to_file` as `invalid_args` (path had backslashes; the retry with `/` worked, which disproves an agent's claim that `{}` must be `{"decision":"allow"}`; cause unknown); `learn` skill still points at Agentic OS files.
 
 ---
 
@@ -292,7 +292,7 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [x] Cross-platform: Python only (no `.ps1`); `python` on Windows, `python3` elsewhere. ✅ CI green on Windows, Linux, macOS (2026-10-08)
 - [x] Real install on this machine + `revathi doctor` all green in Claude Code and Antigravity (2026-10-08)
 - [x] Live test in Claude Code after install: risky command asked with "snapshot saved" and was recorded
-- [ ] Live test in Antigravity. **Antigravity IDE** loads REVATHI's hooks (its log), the quoting fix is untested live there. **Antigravity 2.0** (v2.15.0) shows no hooks loading at all, though its bundled docs say `~/.gemini/config/hooks.json` is read; REVATHI skills do reach it. Cause unknown ❓
+- [x] Live test in Antigravity IDE (2026-10-11): A1–A3 pass (see Phase 6). **Antigravity 2.0**: still open. **Antigravity 2.0** (v2.15.0) shows no hooks loading at all, though its bundled docs say `~/.gemini/config/hooks.json` is read; REVATHI skills do reach it. Cause unknown ❓
 
 **Phase 4 notes:** live: Antigravity hooks loaded but failed (quoted path under `cmd /c`) → fixed; `ask` → `force_ask` (D24) · the real-machine dry run found a crash the tests missed (`claude plugin list` prints `❯`, Windows decoded it wrongly) → fixed + test · the "disabled" wording of `claude plugin list` is assumed, not seen yet.
 
@@ -319,7 +319,8 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [x] Local branch `revathi-standalone` (`git subtree split`, history kept) ready to push to a new repo (D26)
 - [x] GitHub repo `Dharinish007/REVATHI` live; CI green on `e20a6d1` (2026-10-08)
 - [x] **Published to PyPI 2026-10-11** by the user: https://pypi.org/project/revathi/1.0.0rc1/ · verified: fresh venv `pip install revathi` → 1.0.0rc1, `revathi --help`, memory commands, `install --dry-run` all work. Note: that version's PyPI summary doesn't mention memory (fix in the next version's metadata)
-- [ ] Live tests still pending: Antigravity IDE (A1–A3), Claude C2 (canary curl)
+- [x] Live tests (2026-10-11), confirmed in `~/.revathi/logs`: Antigravity IDE A1 `rm -rf` → ask + snapshot (policy: ask, not deny) · A2 `git push --force` → ask · A3 code written, finish with no test → Stop sent back · Claude Code C2: curl carrying the canary key → denied before running
+- [x] Version 1.0.0 prepared (D28 condition met); not yet published
   - A1 guard deny: `rm -rf ~/revathi-a1-test` blocked, plain-English reason · A2 guard ask: `git push --force` → user asked · A3 proof: code written, "done" with no check → Stop sends back. Pass = seen in the IDE **and** in `~/.revathi/logs`.
 
 ### Phase 7 plan: 🧠 Second brain (💭 planned 2026-10-08; decisions D29–D36 Proposed)

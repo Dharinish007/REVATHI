@@ -5,6 +5,15 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-10-11 (prepared, not yet published)
+Final release: the live tests D28 waited for have passed.
+
+### Verified
+- 2026-10-11 · Live tests, confirmed in REVATHI's logs: Antigravity IDE A1 `rm -rf` asked with snapshot, A2 `git push --force` asked, A3 unproven finish sent back; Claude Code C2 canary-key curl denied before running.
+
+### Changed
+- 2026-10-11 · Version 1.0.0rc1 → 1.0.0; PyPI summary now mentions memory.
+
 ### Added
 - 2026-10-11 · `.github/workflows/publish.yml`: publishing a GitHub release runs the tests, checks the tag matches the version, builds and uploads to PyPI with trusted publishing (no token stored anywhere). Needs a one-time link on pypi.org by the user.
 
