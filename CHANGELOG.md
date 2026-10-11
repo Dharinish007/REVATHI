@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 
 ## [Unreleased]
 
+### Decided
+- 2026-10-11 · User accepted all proposed decisions as recommended: D6–D12, D14–D18, D21 details, D22, D23, D28–D34, D36 accepted; D13 replaced by D27; D35 accepted as opt-in, off by default (not built). Guide: handoff note for the next session.
+
 ### Changed
 - 2026-10-11 · **Published to PyPI** (1.0.0rc1, by the user); fresh-environment install verified. README: memory feature, memory commands, memory evidence, Antigravity status updated. `.gitignore`: build output.
 

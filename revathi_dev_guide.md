@@ -4,6 +4,11 @@ The single source of truth for anyone building REVATHI, human or AI. Read the se
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
 **Current phase:** **Phase 6 (Launch) ✅ live on GitHub + PyPI (1.0.0rc1)** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · 7e ✅ · 7f ✅ (benefit proven for decisions not in the code) · 7g ✅ · 7h ✅. Next: Phase 8 (expand), after the user's decisions.**
 
+**Handoff (2026-10-11), start here in a new chat:**
+- State: Phases 0–7 done · 1.0.0rc1 live on GitHub + PyPI · 136/136 tests, CI green · all decisions D1–D36 settled (D13 replaced by D27; D35 accepted as opt-in, not built).
+- Next, in order: ① GitHub trusted publishing (no tokens) ② live Antigravity test of guard + proof (A1–A3) → then 1.0.0 final (D28) ③ build D35 (opt-in prompt recording → learn from corrections) ④ Phase 8: Codex / Cursor / Gemini CLI adapters, starter packs, team mode.
+- Backlog: send-back lists every changed file of the session; scratch `.py` files outside the project count as code; shell-edit parser misreads parts of `python -c`; recall ~85 ms at 1,000 notes; graph builds slowly at 500+ notes; Antigravity 2.0 loads no hooks (cause unknown); `learn` skill still points at Agentic OS files; PyPI summary omits memory (fix in next version).
+
 ---
 
 ## 1. In one line
