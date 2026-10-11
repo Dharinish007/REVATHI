@@ -5,6 +5,9 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 
 ## [Unreleased]
 
+### Changed
+- 2026-10-11 · **Published to PyPI** (1.0.0rc1, by the user); fresh-environment install verified. README: memory feature, memory commands, memory evidence, Antigravity status updated. `.gitignore`: build output.
+
 ### Fixed
 - 2026-10-11 · `evals/grade.py` counted a run as passing when the grader exited 0, even if it printed FAIL (first grading of batch 7 showed B 3/3 instead of 0/3). It now also requires the output to start with PASS; rows re-graded.
 - 2026-10-11 · Code edited through an inline script (`python - <<EOF`, `python -c`, `node -e`, heredocs) was invisible to the proof check (eval batch 6: 3/3 runs). After such a command, code files changed in its folder since the previous record now count as code edits (policy `script_commands`; scan skips dependency folders, stops at 5,000 files or 150 ms: 3 ms on this repo, 92 ms on a whole Desktop). 3 tests.
@@ -25,7 +28,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Versions will 
 - 2026-10-08 · **Phase 7a (memory store):** `engine/memory.py` (OKF v0.2 notes with `x-revathi` keys, stdlib frontmatter parser, inbox → approve/reject/forget, archive instead of delete, hash-chained `log.md`) and `revathi memory propose|list|show|approve|reject|forget|check`. A note counts only if unchanged since the user approved it; secrets are refused. Tests `tests/test_memory.py` (16); 87/87 pass. Why: the safe base the second brain is built on.
 - 2026-10-08 · Guide: Phase 7 (second brain) plan with slices 7a–7h, built on research of memory frameworks, Karpathy's LLM wiki and Google's OKF format. Decisions D29–D36 proposed. Phase 6: GitHub repo marked live (CI green). Why: agree the full plan before writing memory code.
 
-## [1.0.0rc1] - 2026-10-08 (prepared, not yet published)
+## [1.0.0rc1] - 2026-10-08 (published to PyPI 2026-10-11)
 Moved to its own repo: https://github.com/Dharinish007/REVATHI (history kept).
 Everything below under "Unreleased" ships in this release candidate. Packaging: `pip install revathi` → `revathi` command; MIT license; standalone-repo CI with a wheel content check.
 

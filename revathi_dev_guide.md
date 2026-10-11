@@ -2,7 +2,7 @@
 
 The single source of truth for anyone building REVATHI, human or AI. Read the sections you need.
 **Labels:** ✔️ verified (checked in the repo) · 💭 plan/opinion · ❓ unverified (check before relying on it).
-**Current phase:** **Phase 6 (Launch) 🔨 prepared locally; publishing needs the user** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · 7e ✅ · 7f ✅ (benefit proven for decisions not in the code) · 7g ✅ · 7h ✅. Remaining: PyPI publish (user).**
+**Current phase:** **Phase 6 (Launch) ✅ live on GitHub + PyPI (1.0.0rc1)** · Phase 5 ✅ (2026-10-08) · Phase 4 ✅ built (Antigravity live test pending) · Phase 0 ✅ · Phase 1 ✅ · Phase 2 ✅ (2026-10-08) → 🌱 v0.1 scope complete. **Phase 7 (second brain) 🔨: 7a ✅ · 7b ✅ · 7c ✅ · 7d ✅ · 7e ✅ · 7f ✅ (benefit proven for decisions not in the code) · 7g ✅ · 7h ✅. Next: Phase 8 (expand), after the user's decisions.**
 
 ---
 
@@ -313,7 +313,7 @@ Each phase ends only when its **done-criterion** is shown with evidence.
 - [x] Standalone-repo CI (`.github/workflows/tests.yml`): tests on 3 OSes + wheel content check
 - [x] Local branch `revathi-standalone` (`git subtree split`, history kept) ready to push to a new repo (D26)
 - [x] GitHub repo `Dharinish007/REVATHI` live; CI green on `e20a6d1` (2026-10-08)
-- [ ] **User:** PyPI account + approve publishing `revathi` (name was free on 2026-10-08)
+- [x] **Published to PyPI 2026-10-11** by the user: https://pypi.org/project/revathi/1.0.0rc1/ · verified: fresh venv `pip install revathi` → 1.0.0rc1, `revathi --help`, memory commands, `install --dry-run` all work. Note: that version's PyPI summary doesn't mention memory (fix in the next version's metadata)
 - [ ] Live tests still pending: Antigravity IDE (A1–A3), Claude C2 (canary curl)
 
 ### Phase 7 plan: 🧠 Second brain (💭 planned 2026-10-08; decisions D29–D36 Proposed)
